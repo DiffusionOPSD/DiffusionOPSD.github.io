@@ -232,14 +232,6 @@ img { display: block; max-width: 100%; height: auto; }
   bottom: clamp(64px, 8.7vh, 92px);
   width: min(800px, 57vw);
 }
-.hero-eyebrow {
-  margin: 0 0 22px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  opacity: .84;
-}
 .hero h1 {
   margin: 0;
   font-size: clamp(76px, 8.1vw, 132px);
@@ -1172,7 +1164,6 @@ img { display: block; max-width: 100%; height: auto; }
   .hero-copy { top: 19vh; left: 20px; width: calc(100% - 40px); }
   .hero h1 { font-size: 19vw; line-height: .79; }
   .hero h1 span { display: block; width: fit-content; }
-  .hero-eyebrow { font-size: 10px; margin-bottom: 15px; }
   .hero-subtitle { margin-top: 16px; font-size: 18px; }
   .hero-description { font-size: 13px; }
   .hero-buttons { left: 20px; right: 20px; bottom: 28px; gap: 7px; }
