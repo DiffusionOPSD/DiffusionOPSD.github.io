@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10182d">
+  <meta name="description" content="DiffusionOPSD turns image-level reward guidance into explicit, continually refreshed targets for efficient and diagnosable diffusion post-training.">
+  <meta property="og:title" content="DiffusionOPSD — On-Policy Self-Distillation in Diffusion Models">
+  <meta property="og:description" content="A practical on-policy self-distillation framework for efficient and diagnosable diffusion post-training.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/hero.jpg">
+  <title>DiffusionOPSD — On-Policy Self-Distillation in Diffusion Models</title>
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="icon" href="assets/seed-favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="assets/seed-favicon-16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="assets/seed-favicon-180.png" sizes="180x180">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="#overview" aria-label="DiffusionOPSD home">
+      <img src="assets/seed-logo.png" alt="ByteDance Seed" width="214" height="39">
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary navigation">
+      <a href="#overview">Overview</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#analysis">Analysis</a>
+      <a href="#gallery">Gallery</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="research-menu" id="research-menu">
+        <button class="header-paper" id="more-research-button" type="button" aria-expanded="false" aria-controls="research-popover">
+          More Research
+          <span class="research-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="research-popover" id="research-popover">
+          <a href="https://danceopd.github.io/" target="_blank" rel="noopener">
+            <span>
+              <strong>DanceOPD</strong>
+              <small>Project homepage</small>
+            </span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+      <button class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+        <span></span><span></span>
+      </button>
+    </div>
+
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+      <a href="#overview">Overview</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#analysis">Analysis</a>
+      <a href="#gallery">Gallery</a>
+      <details class="mobile-research-menu">
+        <summary>More Research</summary>
+        <a href="https://danceopd.github.io/" target="_blank" rel="noopener">DanceOPD <span aria-hidden="true">↗</span></a>
+      </details>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" id="overview" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true"></div>
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <div class="hero-copy">
+        <p class="hero-eyebrow">ByteDance Seed · Vision Research · August 2026</p>
+        <h1 id="hero-title"><span>Diffusion</span><span class="title-accent">OPSD</span></h1>
+        <p class="hero-subtitle">On-Policy Self-Distillation in Diffusion Models</p>
+        <p class="hero-description">
+          We convert image-level reward guidance into bounded positive and negative targets for clean-output predictions—then continually refresh that supervision as the behavior policy evolves.
+        </p>
+      </div>
+
+      <div class="hero-buttons" aria-label="Research links">
+        <a class="button button-solid" href="assets/diffusionopsd-paper.pdf" target="_blank" rel="noopener">
+          <span class="button-icon arxiv-mark" aria-hidden="true">aX</span>
+          <span>Technical Report</span>
+        </a>
+        <a class="button button-glass" href="https://github.com/weichow23/DanceOPD-self" target="_blank" rel="noopener">
+          <svg class="button-icon" aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.57-.3-5.27-1.29-5.27-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.93 10.93 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.4-2.71 5.38-5.29 5.67.42.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+          <span>Code</span>
+        </a>
+        <a class="button button-glass" href="#method">
+          <svg class="button-icon" aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3 10.7 9-7.2 9 7.2M5.5 9.2v10.3h13V9.2M9.5 19.5v-6h5v6"/></svg>
+          <span>Explore Method</span>
+        </a>
+      </div>
+
+      <a class="scroll-cue" href="#method" aria-label="Scroll to method">
+        <span>Discover</span>
+        <span class="scroll-line"></span>
+      </a>
+    </section>
+
+    <section class="section intro-section" id="method" aria-labelledby="method-title">
+      <div class="section-inner">
+        <div class="section-heading reveal">
+          <div>
+            <p class="kicker">On-policy self-distillation</p>
+            <h2 id="method-title">From endpoint reward to explicit intermediate supervision</h2>
+          </div>
+          <p>
+            Mainstream endpoint rewards tell us whether an image is good, but not how an intermediate denoising prediction should change. DiffusionOPSD closes this supervision gap by constructing reward-improving targets at sampled low-noise queries.
+          </p>
+        </div>
+
+        <button class="figure-button reveal" type="button" data-lightbox="assets/method-overview.png" data-caption="DiffusionOPSD overview: behavior-policy query collection, bounded reward-gradient target construction, detached finite fitting, and EMA refresh.">
+          <img src="assets/method-overview-animated.gif" alt="Animated DiffusionOPSD overview assembled component by component along the training flow" width="1920" height="830">
+          <span class="expand-label">Expand final figure <span aria-hidden="true">↗</span></span>
+        </button>
+
+        <div class="stage-grid">
+          <article class="stage-card reveal">
+            <span class="stage-number">01</span>
+            <h3>Collect on-policy queries</h3>
+            <p>A frozen behavior policy generates trajectories and supplies low-noise query states and clean-output anchors.</p>
+          </article>
+          <article class="stage-card reveal">
+            <span class="stage-number">02</span>
+            <h3>Construct bounded targets</h3>
+            <p>Normalized reward ascent and descent create positive and negative targets inside a controlled clean-output radius.</p>
+          </article>
+          <article class="stage-card reveal">
+            <span class="stage-number">03</span>
+            <h3>Fit, refresh, repeat</h3>
+            <p>The trainable policy fits detached targets under a finite budget; EMA then refreshes the behavior policy for the next iteration.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results-section" id="results" aria-labelledby="results-title">
+      <div class="section-inner">
+        <div class="section-heading reveal">
+          <div>
+            <p class="kicker">Model performance</p>
+            <h2 id="results-title">Faster improvement. Stronger held-out quality.</h2>
+          </div>
+          <p>
+            Matched experiments span SD3.5-M and the step-distilled Z-Image-Turbo, covering ten evaluators and both reward-specific and joint training settings.
+          </p>
+        </div>
+
+        <div class="stat-grid reveal" aria-label="Headline results">
+          <article class="stat-card stat-primary">
+            <strong><span class="count-up" data-target="19">0</span><span>/20</span></strong>
+            <p>best final held-out scores in reward-matched settings</p>
+          </article>
+          <article class="stat-card">
+            <strong>+<span class="count-up" data-target="44">0</span><span>.0%</span></strong>
+            <p>relative gain over the strongest competing method</p>
+          </article>
+          <article class="stat-card">
+            <strong><span class="count-up" data-target="40">0</span><span>%</span></strong>
+            <p>fewer training GPU-hours than DiffusionNFT on SD3.5-M</p>
+          </article>
+          <article class="stat-card">
+            <strong><span class="count-up" data-target="63">0</span><span>%</span></strong>
+            <p>fewer training GPU-hours than DiffusionNFT on Z-Image-Turbo</p>
+          </article>
+        </div>
+
+        <div class="leaderboard-block reveal" id="leaderboard" aria-labelledby="leaderboard-title">
+          <div class="leaderboard-heading">
+            <div>
+              <p class="kicker">Main comparison</p>
+              <h3 id="leaderboard-title">DiffusionOPSD Leaderboard</h3>
+            </div>
+          </div>
+
+          <div class="leaderboard-metric-switch" aria-label="Metric group">
+            <span>Metric set</span>
+            <button type="button" class="metric-chip active" data-metric-group="all" aria-pressed="true">All metrics</button>
+            <button type="button" class="metric-chip" data-metric-group="open" aria-pressed="false">Open-source</button>
+            <button type="button" class="metric-chip" data-metric-group="internal" aria-pressed="false">Internal</button>
+          </div>
+
+          <div class="leaderboard-toolbar">
+            <label class="leaderboard-search">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.7" cy="10.7" r="6.7"/><path d="m16 16 4 4"/></svg>
+              <span class="visually-hidden">Search methods</span>
+              <input id="leaderboard-search" type="search" placeholder="Search method or backbone" autocomplete="off">
+            </label>
+            <div class="leaderboard-tabs" aria-label="Backbone filter">
+              <button type="button" class="leaderboard-tab active" data-backbone-filter="sd35" aria-pressed="true"><span class="tab-icon tab-icon-sd" aria-hidden="true">S</span>SD3.5-M</button>
+              <button type="button" class="leaderboard-tab" data-backbone-filter="zimage" aria-pressed="false"><span class="tab-icon tab-icon-z" aria-hidden="true">Z</span>Z-Image-Turbo</button>
+            </div>
+            <span class="leaderboard-summary" id="leaderboard-summary" aria-live="polite">17 methods</span>
+          </div>
+
+          <div class="leaderboard-panel">
+            <div class="leaderboard-table-scroll" tabindex="0" aria-label="Scrollable main comparison table">
+              <table class="leaderboard-table">
+                <caption>Held-out evaluator scores from Table 1 of the DiffusionOPSD paper. Higher is better.</caption>
+                <thead>
+                  <tr>
+                    <th rowspan="2" scope="col">Model</th>
+                    <th rowspan="2" scope="col">Specific</th>
+                    <th rowspan="2" scope="col">Updates</th>
+                    <th class="metric-group-open" colspan="7" scope="colgroup"><span class="metric-heading-icon metric-heading-open" aria-hidden="true">↗</span>Open-Sourced Evaluators</th>
+                    <th class="metric-group-internal" colspan="3" scope="colgroup"><span class="metric-heading-icon metric-heading-internal" aria-hidden="true">◆</span>Internal Evaluators</th>
+                  </tr>
+                  <tr>
+                    <th scope="col">Pick</th>
+                    <th scope="col">CLIP</th>
+                    <th scope="col">HPSv2.1</th>
+                    <th scope="col">Aes</th>
+                    <th scope="col">ImgR</th>
+                    <th scope="col">HPSv3</th>
+                    <th scope="col">DeQA</th>
+                    <th scope="col">AltCLIP</th>
+                    <th scope="col">Point</th>
+                    <th scope="col">Pair</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-main-table-row data-backbone="sd35" data-search="sdxl reported reference">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-sd" aria-hidden="true">S</span><span class="model-copy">SDXL <sup>‡</sup></span></span></th><td>×</td><td>–</td><td>22.42</td><td>0.287</td><td>0.280</td><td>5.60</td><td>0.76</td><td>1.93</td><td>4.17</td><td>0.366</td><td>0.089</td><td>0.168</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="sd3.5-l reported reference">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-sd" aria-hidden="true">S</span><span class="model-copy">SD3.5-L <sup>‡</sup></span></span></th><td>×</td><td>–</td><td>22.91</td><td>0.289</td><td>0.288</td><td>5.50</td><td>0.96</td><td>5.04</td><td>4.26</td><td>0.393</td><td>0.171</td><td>0.361</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="flux.1-dev reported reference">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flux" aria-hidden="true">F</span><span class="model-copy">FLUX.1-dev <sup>‡</sup></span></span></th><td>×</td><td>–</td><td>22.84</td><td>0.295</td><td>0.274</td><td>5.71</td><td>0.96</td><td>6.71</td><td>4.41</td><td>0.376</td><td>0.179</td><td>0.323</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="sd3.5-m without cfg base">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-cfg" aria-hidden="true">C</span><span class="model-copy">SD3.5-M w/o CFG <sup>‡</sup></span></span></th><td>×</td><td>–</td><td>20.51</td><td>0.237</td><td>0.204</td><td>5.13</td><td>−0.58</td><td>−6.47</td><td>3.30</td><td>0.276</td><td>0.026</td><td>0.069</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="cfg base">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-cfg" aria-hidden="true">C</span><span class="model-copy">+ CFG <sup>‡</sup></span></span></th><td>×</td><td>–</td><td>22.34</td><td>0.285</td><td>0.279</td><td>5.36</td><td>0.85</td><td>2.69</td><td>4.04</td><td>0.380</td><td>0.136</td><td>0.290</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="flowgrpo reported 5k">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO <sup>‡</sup></span></span></th><td>×</td><td>&gt;5k</td><td>22.51</td><td>0.293</td><td>0.274</td><td>5.32</td><td>1.06</td><td>2.65</td><td>4.01</td><td>0.393</td><td>0.181</td><td>0.388</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="flowgrpo 2k">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO <small>2k</small></span></span></th><td>×</td><td>2k</td><td>22.41</td><td>0.290</td><td>0.280</td><td>5.32</td><td>0.95</td><td>2.67</td><td>4.06</td><td>0.387</td><td>0.151</td><td>0.314</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="flowgrpo 4k">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO <small>4k</small></span></span></th><td>×</td><td>4k</td><td>23.50</td><td>0.280</td><td>0.316</td><td>5.90</td><td>1.29</td><td>7.08</td><td>4.15</td><td>0.397</td><td>0.162</td><td>0.325</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft reported 1.7k">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT <sup>‡</sup></span></span></th><td>×</td><td>1.7k</td><td>23.80</td><td>0.293</td><td>0.331</td><td>6.01</td><td>1.49</td><td>7.48</td><td>4.34</td><td>0.398</td><td>0.111</td><td>0.296</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft joint multi reward 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td>×</td><td>300</td><td>23.62</td><td>0.294</td><td>0.340</td><td>6.02</td><td>1.45</td><td>8.36</td><td>4.32</td><td>0.397</td><td>0.150</td><td>0.294</td>
+                  </tr>
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd joint multi reward 300 ours">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD <small>joint</small></span><span class="ours-pill">ours</span></span></th><td>×</td><td>300</td><td><strong>25.51</strong></td><td><strong>0.333</strong></td><td><strong>0.389</strong></td><td>6.03</td><td>1.51</td><td>9.41</td><td>4.40</td><td>0.399</td><td>0.170</td><td>0.345</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="danceopd two stage 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-dance" aria-hidden="true">D</span><span class="model-copy">+ DanceOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>23.06</td><td>0.272</td><td>0.322</td><td>5.98</td><td>1.23</td><td>7.24</td><td>4.34</td><td>0.378</td><td>0.127</td><td>0.219</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="diffusionopd two stage 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opd" aria-hidden="true">D</span><span class="model-copy">+ DiffusionOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>23.05</td><td>0.269</td><td>0.322</td><td>6.04</td><td>1.23</td><td>7.39</td><td>4.34</td><td>0.373</td><td>0.122</td><td>0.199</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="flowopd two stage 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flowopd" aria-hidden="true">F</span><span class="model-copy">+ FlowOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>22.62</td><td>0.263</td><td>0.300</td><td>5.98</td><td>0.92</td><td>5.00</td><td>4.20</td><td>0.353</td><td>0.101</td><td>0.166</td>
+                  </tr>
+                  <tr class="leaderboard-specific-start" data-main-table-row data-backbone="sd35" data-search="refl reward specific 100">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>23.92</td><td>0.308</td><td>0.358</td><td class="score-best">12.09</td><td>1.28</td><td>9.33</td><td>4.85</td><td>0.408</td><td>0.193</td><td>0.290</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft reward specific 100">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>23.43</td><td>0.298</td><td>0.336</td><td>9.11</td><td>1.46</td><td>9.14</td><td>4.76</td><td>0.412</td><td>0.199</td><td>0.323</td>
+                  </tr>
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd reward specific 100 ours">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">24.94</td><td class="score-best">0.340</td><td class="score-best">0.390</td><td>12.08</td><td class="score-best">1.76</td><td class="score-best">13.34</td><td class="score-best">4.94</td><td class="score-best">0.450</td><td class="score-best">0.214</td><td class="score-best">0.465</td>
+                  </tr>
+
+                  <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo base" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-zimage" aria-hidden="true">Z</span><span class="model-copy">Z-Image-Turbo</span></span></th><td>×</td><td>–</td><td>22.86</td><td>0.276</td><td>0.296</td><td>5.41</td><td>0.96</td><td>6.19</td><td>4.44</td><td>0.392</td><td>0.213</td><td>0.422</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo flowgrpo reward specific 100" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.96</td><td>0.275</td><td>0.305</td><td>5.46</td><td>1.01</td><td>7.11</td><td>4.51</td><td>0.394</td><td>0.217</td><td>0.420</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo refl reward specific 100" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>24.54</td><td>0.313</td><td>0.380</td><td>9.79</td><td>1.37</td><td>13.77</td><td>4.60</td><td>0.441</td><td>0.227</td><td>0.481</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo diffusionnft reward specific 100" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.28</td><td>0.280</td><td>0.277</td><td>6.07</td><td>0.58</td><td>1.58</td><td>3.37</td><td>0.363</td><td>0.166</td><td>0.357</td>
+                  </tr>
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="zimage" data-search="z-image-turbo diffusionopsd reward specific 100 ours" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">25.15</td><td class="score-best">0.320</td><td class="score-best">0.390</td><td class="score-best">10.74</td><td class="score-best">1.79</td><td class="score-best">14.44</td><td class="score-best">4.78</td><td class="score-best">0.451</td><td class="score-best">0.243</td><td class="score-best">0.551</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="leaderboard-notes">
+              <span><b>✓</b> reward-specific checkpoint</span>
+              <span><b>×</b> one checkpoint evaluated across all columns</span>
+              <span><b>‡</b> reported metrics where available</span>
+              <span><b>†</b> two-stage OPD baseline</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-visual reveal">
+          <div class="result-visual-copy">
+            <p class="mini-label">Normalized progress</p>
+            <h3>DiffusionOPSD improves fastest and finishes highest.</h3>
+            <p>Training reward and held-out quality are reported separately, while cumulative GPU-hours provide a common compute axis across methods.</p>
+            <div class="legend-list" aria-label="Methods in chart">
+              <span><i class="legend opsd"></i>DiffusionOPSD</span>
+              <span><i class="legend refl"></i>ReFL</span>
+              <span><i class="legend flow"></i>FlowGRPO</span>
+              <span><i class="legend nft"></i>DiffusionNFT</span>
+            </div>
+          </div>
+          <div class="interactive-chart-card" data-interactive-chart="aggregate">
+            <div class="interactive-chart-bar">
+              <div><span>Interactive figure</span><strong>Hover to inspect · click a method to filter</strong></div>
+              <div class="chart-legend" data-chart-legend aria-label="Toggle chart methods"></div>
+            </div>
+            <div class="chart-stage">
+              <div class="chart-canvas" id="aggregate-chart" role="img" aria-label="Interactive native training and held-out quality gain curves"></div>
+              <img class="chart-fallback" src="assets/training-curves.png" alt="Training and held-out quality curves comparing DiffusionOPSD against baselines" width="1505" height="472" loading="lazy">
+              <div class="chart-tooltip" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="backbone-strip reveal">
+          <div>
+            <span class="backbone-mark"></span>
+            <div><small>Backbone 01</small><strong>SD3.5-M</strong></div>
+          </div>
+          <p>Strong final reward with a 40% reduction in profiled training cost.</p>
+          <div>
+            <span class="backbone-mark cyan"></span>
+            <div><small>Backbone 02</small><strong>Z-Image-Turbo</strong></div>
+          </div>
+          <p>Consistent improvement under a step-distilled native schedule with 63% lower training GPU-hours.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section analysis-section" id="analysis" aria-labelledby="analysis-title">
+      <div class="section-inner">
+        <div class="section-heading reveal">
+          <div>
+            <p class="kicker">Diagnosable alignment</p>
+            <h2 id="analysis-title">A better target need not produce a better finite update</h2>
+          </div>
+          <p>
+            Explicit supervision lets us audit target construction and finite realization as separate stages. The diagnostics below move from local direction attribution to same-query fitting, then test whether the complete protocol remains stable across budgets, backbones, and reward settings.
+          </p>
+        </div>
+
+        <div class="analysis-summary-grid reveal" aria-label="Mechanism findings">
+          <article>
+            <span>Target construction</span>
+            <strong>+0.03511</strong>
+            <p>Fixed-suffix reward gain from the reward-gradient positive target.</p>
+          </article>
+          <article>
+            <span>HPSv2.1 reversal</span>
+            <strong>62.3%</strong>
+            <p>Prompts where the better constructed target produces the lower finite update.</p>
+          </article>
+          <article>
+            <span>Controlled scope</span>
+            <strong>n = 512</strong>
+            <p>Held-out, same-query probes with parameters restored between prompts.</p>
+          </article>
+        </div>
+
+        <div class="analysis-grid">
+          <article class="analysis-card analysis-card-wide reveal">
+            <div class="card-copy">
+              <span class="card-index">01 · Endpoint controls</span>
+              <h3>The reward-gradient target stays strongest—and CFG-free training wins</h3>
+              <p>Three linked diagnostics compare target direction, implementation sensitivity, and the full train/eval CFG grid. Hover or focus any mark for its exact value; click to keep a selection while comparing panels.</p>
+            </div>
+            <div class="cfg-chart-card endpoint-controls-card" data-endpoint-chart data-cfg-chart>
+              <div class="cfg-chart-toolbar">
+                <div>
+                  <span>Interactive figure</span>
+                  <strong>Direction · implementation · CFG dependence</strong>
+                </div>
+                <div class="cfg-view-switch" role="group" aria-label="CFG chart display">
+                  <button type="button" class="active" data-cfg-view="score" aria-pressed="true">Score</button>
+                  <button type="button" data-cfg-view="gap" aria-pressed="false">Gap from best</button>
+                </div>
+              </div>
+
+              <div class="endpoint-panels">
+                <section class="endpoint-panel" aria-labelledby="direction-endpoint-title">
+                  <h4 id="direction-endpoint-title"><span>(a)</span> Direction endpoint</h4>
+                  <div class="endpoint-svg-chart" id="direction-endpoint-chart" role="group" aria-label="Interactive CLIPScore comparison of reward-gradient, random, no-op, and rollout-residual target directions"></div>
+                </section>
+
+                <section class="endpoint-panel" aria-labelledby="implementation-sensitivity-title">
+                  <h4 id="implementation-sensitivity-title"><span>(b)</span> Implementation sensitivity</h4>
+                  <div class="endpoint-svg-chart" id="implementation-sensitivity-chart" role="group" aria-label="Interactive ranges of CLIPScore change across implementation controls"></div>
+                </section>
+
+                <section class="endpoint-panel endpoint-panel-cfg" aria-labelledby="cfg-dependence-title">
+                  <h4 id="cfg-dependence-title"><span>(c)</span> CFG dependence</h4>
+                  <div class="cfg-plot-shell cfg-plot-shell-compact">
+                    <span class="cfg-y-title">Eval <i>g</i><sub>ev</sub></span>
+                    <div class="cfg-y-labels" aria-hidden="true"><span>6.0</span><span>4.5</span><span>1.0</span></div>
+                    <div class="cfg-plot" aria-label="Interactive CFG dependence chart. No CFG corresponds to train and evaluation guidance scale 1.0 for SD3.5-M.">
+                      <svg class="cfg-guides" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="cfg-guide-matched" d="M 12 88 L 88 12"></path>
+                        <path class="cfg-guide-product cfg-guide-product-a" d="M 12 50 C 33 76, 45 86, 50 88"></path>
+                        <path class="cfg-guide-product cfg-guide-product-b" d="M 12 12 C 30 55, 55 82, 88 88"></path>
+                      </svg>
+
+                      <button class="cfg-point cfg-point-best" type="button" style="--x:12%;--y:88%;--point:#787878" data-train="1.0" data-eval="1.0" data-score="0.312" data-gap="0.000" data-note="CFG-free · strongest setting" aria-label="Train 1.0, evaluate 1.0, CLIPScore 0.312, strongest setting"><span data-cfg-value>312</span></button>
+                      <button class="cfg-point" type="button" style="--x:12%;--y:50%;--point:#56bcc7" data-train="1.0" data-eval="4.5" data-score="0.311" data-gap="-0.001" data-note="Evaluation-only CFG" aria-label="Train 1.0, evaluate 4.5, CLIPScore 0.311"><span data-cfg-value>311</span></button>
+                      <button class="cfg-point" type="button" style="--x:12%;--y:12%;--point:#5087f2" data-train="1.0" data-eval="6.0" data-score="0.310" data-gap="-0.002" data-note="Evaluation-only CFG" aria-label="Train 1.0, evaluate 6.0, CLIPScore 0.310"><span data-cfg-value>310</span></button>
+                      <button class="cfg-point" type="button" style="--x:50%;--y:88%;--point:#56bcc7" data-train="4.5" data-eval="1.0" data-score="0.278" data-gap="-0.034" data-note="Train/eval mismatch" aria-label="Train 4.5, evaluate 1.0, CLIPScore 0.278"><span data-cfg-value>278</span></button>
+                      <button class="cfg-point cfg-point-matched" type="button" style="--x:50%;--y:50%;--point:#28825a" data-train="4.5" data-eval="4.5" data-score="0.307" data-gap="-0.005" data-note="Matched CFG · below CFG-free" aria-label="Train 4.5, evaluate 4.5, CLIPScore 0.307"><span data-cfg-value>307</span></button>
+                      <button class="cfg-point" type="button" style="--x:50%;--y:12%;--point:#cea831" data-train="4.5" data-eval="6.0" data-score="0.306" data-gap="-0.006" data-note="Train/eval mismatch" aria-label="Train 4.5, evaluate 6.0, CLIPScore 0.306"><span data-cfg-value>306</span></button>
+                      <button class="cfg-point" type="button" style="--x:88%;--y:88%;--point:#5087f2" data-train="6.0" data-eval="1.0" data-score="0.263" data-gap="-0.049" data-note="Largest mismatch penalty" aria-label="Train 6.0, evaluate 1.0, CLIPScore 0.263"><span data-cfg-value>263</span></button>
+                      <button class="cfg-point" type="button" style="--x:88%;--y:50%;--point:#cea831" data-train="6.0" data-eval="4.5" data-score="0.308" data-gap="-0.004" data-note="Train/eval mismatch" aria-label="Train 6.0, evaluate 4.5, CLIPScore 0.308"><span data-cfg-value>308</span></button>
+                      <button class="cfg-point cfg-point-matched" type="button" style="--x:88%;--y:12%;--point:#1e5aaa" data-train="6.0" data-eval="6.0" data-score="0.305" data-gap="-0.007" data-note="Matched CFG · below CFG-free" aria-label="Train 6.0, evaluate 6.0, CLIPScore 0.305"><span data-cfg-value>305</span></button>
+                    </div>
+                    <div class="cfg-x-labels" aria-hidden="true"><span>1.0</span><span>4.5</span><span>6.0</span></div>
+                    <span class="cfg-x-title">Train <i>g</i><sub>tr</sub></span>
+                  </div>
+                </section>
+              </div>
+
+              <div class="cfg-chart-footer">
+                <div class="cfg-readout" aria-live="polite">
+                  <span>Selected control</span>
+                  <strong data-cfg-readout-title>Train 1.0 · Eval 1.0</strong>
+                  <p data-cfg-readout-value>0.312 CLIPScore · CFG-free · strongest setting</p>
+                </div>
+                <div class="cfg-chart-legend" aria-label="Chart guide legend">
+                  <span><i class="cfg-legend-line cfg-legend-matched"></i>Matched scale</span>
+                  <span><i class="cfg-legend-line cfg-legend-product"></i>Same-product guides</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="analysis-card analysis-card-wide reveal">
+            <div class="card-copy">
+              <span class="card-index">02 · Robustness</span>
+              <h3>The complete loop remains stable beyond the isolated probe</h3>
+              <p>Shared-reference progress, cell-wise terminal position, and joint multi-reward training show that the default remains effective across target radius, query noise, fit scale, behavior EMA, and related training choices.</p>
+            </div>
+            <div class="interactive-chart-card interactive-chart-card-wide" data-interactive-chart="robustness">
+              <div class="interactive-chart-bar">
+                <div><span>Interactive figure</span><strong>Hover to inspect · click a method to filter</strong></div>
+                <div class="chart-legend" data-chart-legend aria-label="Toggle chart methods"></div>
+              </div>
+              <div class="chart-stage">
+                <div class="chart-canvas" id="robustness-chart" role="img" aria-label="Interactive robustness, terminal stability, and multi-reward plots"></div>
+                <img class="chart-fallback" src="assets/robustness.png" alt="Robustness and multi-reward results for DiffusionOPSD" width="1764" height="635" loading="lazy">
+                <div class="chart-tooltip" role="status" aria-live="polite"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="analysis-explainer reveal">
+            <span class="card-index">03 · Interpretation</span>
+            <h3>Three measurements answer three different questions</h3>
+            <ol>
+              <li><strong>Construction gain</strong><span>Did reward guidance create a better local output target?</span></li>
+              <li><strong>Realized gain</strong><span>Did the finite parameter update reproduce that improvement at the same query?</span></li>
+              <li><strong>End-to-end quality</strong><span>Did repeated construct–fit–re-anchor iterations improve held-out generations?</span></li>
+            </ol>
+            <p>DiffusionOPSD exposes all three without treating any one of them as a substitute for the others.</p>
+          </article>
+
+          <article class="principle-card reveal">
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <p>Target construction and finite realization should be evaluated separately in diffusion post-training.</p>
+            <span class="principle-label">Evaluation principle</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section gallery-section" id="gallery" aria-labelledby="gallery-title">
+      <div class="section-inner gallery-heading-wrap">
+        <div class="section-heading reveal">
+          <div>
+            <p class="kicker">Held-out comparisons</p>
+            <h2 id="gallery-title">Prompt fidelity across diverse visual tasks</h2>
+          </div>
+          <p>
+            Across rendered text, motion, structured diagrams, object composition, and fine detail, DiffusionOPSD preserves the requested content more consistently than the compared baselines.
+          </p>
+        </div>
+      </div>
+
+      <div class="comparison-carousel section-inner reveal" aria-label="Nine prompt comparison groups">
+        <div class="comparison-toolbar">
+          <span class="comparison-count" id="comparison-count">01 / 09</span>
+          <div class="comparison-arrows">
+            <button class="round-button" id="comparison-prev" type="button" aria-label="Previous prompt comparison">←</button>
+            <button class="round-button" id="comparison-next" type="button" aria-label="Next prompt comparison">→</button>
+          </div>
+        </div>
+
+        <div class="comparison-viewport" id="comparison-viewport" tabindex="0">
+          <div class="comparison-track" id="comparison-track">
+            <article class="comparison-slide" data-comparison-slide aria-hidden="false">
+              <div class="comparison-prompt"><span>Prompt 01</span><p>Futuristic fashion editorial: a woman in holographic fabrics and LED accents in a dark reflective studio, glossy and ultra-detailed.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/01-fashion/base.jpg" data-caption="Base · Futuristic fashion editorial"><span>Base</span><img src="assets/comparisons/01-fashion/base.jpg" alt="Base model result for futuristic fashion prompt" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/01-fashion/refl.jpg" data-caption="ReFL · Futuristic fashion editorial"><span>ReFL</span><img src="assets/comparisons/01-fashion/refl.jpg" alt="ReFL result for futuristic fashion prompt" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/01-fashion/nft.jpg" data-caption="DiffusionNFT · Futuristic fashion editorial"><span>DiffusionNFT</span><img src="assets/comparisons/01-fashion/nft.jpg" alt="DiffusionNFT result for futuristic fashion prompt" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/01-fashion/flowgrpo.jpg" data-caption="FlowGRPO · Futuristic fashion editorial"><span>FlowGRPO</span><img src="assets/comparisons/01-fashion/flowgrpo.jpg" alt="FlowGRPO result for futuristic fashion prompt" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/01-fashion/opsd.jpg" data-caption="DiffusionOPSD · Futuristic fashion editorial"><span>DiffusionOPSD</span><img src="assets/comparisons/01-fashion/opsd.jpg" alt="DiffusionOPSD result for futuristic fashion prompt" width="760" height="760" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 02</span><p>Liquid-mercury 3D “DiffusionOPSD” letters on a dark reflective stage with volumetric spotlights and crisp product-render detail.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/base.jpg" data-caption="Base · Liquid-mercury typography"><span>Base</span><img src="assets/comparisons/02-typography/base.jpg" alt="Base model typography result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/refl.jpg" data-caption="ReFL · Liquid-mercury typography"><span>ReFL</span><img src="assets/comparisons/02-typography/refl.jpg" alt="ReFL typography result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/nft.jpg" data-caption="DiffusionNFT · Liquid-mercury typography"><span>DiffusionNFT</span><img src="assets/comparisons/02-typography/nft.jpg" alt="DiffusionNFT typography result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/flowgrpo.jpg" data-caption="FlowGRPO · Liquid-mercury typography"><span>FlowGRPO</span><img src="assets/comparisons/02-typography/flowgrpo.jpg" alt="FlowGRPO typography result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/02-typography/opsd.jpg" data-caption="DiffusionOPSD · Liquid-mercury typography"><span>DiffusionOPSD</span><img src="assets/comparisons/02-typography/opsd.jpg" alt="DiffusionOPSD typography result" width="1254" height="1254" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 03</span><p>Macro miniature scene: a tiny fisherman on a pebble beside a blue-resin lake spilling from a bottle; whimsical and detailed.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/03-miniature/base.jpg" data-caption="Base · Miniature fisherman"><span>Base</span><img src="assets/comparisons/03-miniature/base.jpg" alt="Base model miniature fisherman result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/03-miniature/refl.jpg" data-caption="ReFL · Miniature fisherman"><span>ReFL</span><img src="assets/comparisons/03-miniature/refl.jpg" alt="ReFL miniature fisherman result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/03-miniature/nft.jpg" data-caption="DiffusionNFT · Miniature fisherman"><span>DiffusionNFT</span><img src="assets/comparisons/03-miniature/nft.jpg" alt="DiffusionNFT miniature fisherman result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/03-miniature/flowgrpo.jpg" data-caption="FlowGRPO · Miniature fisherman"><span>FlowGRPO</span><img src="assets/comparisons/03-miniature/flowgrpo.jpg" alt="FlowGRPO miniature fisherman result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/03-miniature/opsd.jpg" data-caption="DiffusionOPSD · Miniature fisherman"><span>DiffusionOPSD</span><img src="assets/comparisons/03-miniature/opsd.jpg" alt="DiffusionOPSD miniature fisherman result" width="1254" height="1254" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 04</span><p>A football striker performing an overhead bicycle kick in a floodlit stadium, with both feet off the ground and the torso tilted backward.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/base.jpg" data-caption="Base · Bicycle kick"><span>Base</span><img src="assets/comparisons/04-motion/base.jpg" alt="Base model bicycle kick result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/refl.jpg" data-caption="ReFL · Bicycle kick"><span>ReFL</span><img src="assets/comparisons/04-motion/refl.jpg" alt="ReFL bicycle kick result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/nft.jpg" data-caption="DiffusionNFT · Bicycle kick"><span>DiffusionNFT</span><img src="assets/comparisons/04-motion/nft.jpg" alt="DiffusionNFT bicycle kick result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/flowgrpo.jpg" data-caption="FlowGRPO · Bicycle kick"><span>FlowGRPO</span><img src="assets/comparisons/04-motion/flowgrpo.jpg" alt="FlowGRPO bicycle kick result" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/04-motion/opsd.jpg" data-caption="DiffusionOPSD · Bicycle kick"><span>DiffusionOPSD</span><img src="assets/comparisons/04-motion/opsd.jpg" alt="DiffusionOPSD bicycle kick result" width="1254" height="1254" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 05</span><p>A clearly labeled educational poster showing the Earth's crust, mantle, outer core, and inner core, with readable depth and temperature annotations.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/base.jpg" data-caption="Base · Earth layers poster"><span>Base</span><img src="assets/comparisons/05-earth-layers/base.jpg" alt="Base model Earth layers poster" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/refl.jpg" data-caption="ReFL · Earth layers poster"><span>ReFL</span><img src="assets/comparisons/05-earth-layers/refl.jpg" alt="ReFL Earth layers poster" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/nft.jpg" data-caption="DiffusionNFT · Earth layers poster"><span>DiffusionNFT</span><img src="assets/comparisons/05-earth-layers/nft.jpg" alt="DiffusionNFT Earth layers poster" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/flowgrpo.jpg" data-caption="FlowGRPO · Earth layers poster"><span>FlowGRPO</span><img src="assets/comparisons/05-earth-layers/flowgrpo.jpg" alt="FlowGRPO Earth layers poster" width="1254" height="1254" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/05-earth-layers/opsd.jpg" data-caption="DiffusionOPSD · Earth layers poster"><span>DiffusionOPSD</span><img src="assets/comparisons/05-earth-layers/opsd.jpg" alt="DiffusionOPSD Earth layers poster" width="1254" height="1254" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 06</span><p>1950s American diner at night with chrome, neon, a roller-skating waitress, red Cadillac, warm Kodachrome nostalgia, and the restaurant name “RRACE” visible.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/06-retro-diner/base.jpg" data-caption="Base · 1950s American diner"><span>Base</span><img src="assets/comparisons/06-retro-diner/base.jpg" alt="Base model retro diner result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/06-retro-diner/refl.jpg" data-caption="ReFL · 1950s American diner"><span>ReFL</span><img src="assets/comparisons/06-retro-diner/refl.jpg" alt="ReFL retro diner result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/06-retro-diner/nft.jpg" data-caption="DiffusionNFT · 1950s American diner"><span>DiffusionNFT</span><img src="assets/comparisons/06-retro-diner/nft.jpg" alt="DiffusionNFT retro diner result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/06-retro-diner/flowgrpo.jpg" data-caption="FlowGRPO · 1950s American diner"><span>FlowGRPO</span><img src="assets/comparisons/06-retro-diner/flowgrpo.jpg" alt="FlowGRPO retro diner result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/06-retro-diner/opsd.jpg" data-caption="DiffusionOPSD · 1950s American diner"><span>DiffusionOPSD</span><img src="assets/comparisons/06-retro-diner/opsd.jpg" alt="DiffusionOPSD retro diner result" width="760" height="760" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 07</span><p>High-fashion model walking in an avant-garde metallic gown on a windswept dune under bright golden-hour light, with dramatic fabric motion.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/07-desert-fashion/base.jpg" data-caption="Base · Desert fashion"><span>Base</span><img src="assets/comparisons/07-desert-fashion/base.jpg" alt="Base model desert fashion result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/07-desert-fashion/refl.jpg" data-caption="ReFL · Desert fashion"><span>ReFL</span><img src="assets/comparisons/07-desert-fashion/refl.jpg" alt="ReFL desert fashion result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/07-desert-fashion/nft.jpg" data-caption="DiffusionNFT · Desert fashion"><span>DiffusionNFT</span><img src="assets/comparisons/07-desert-fashion/nft.jpg" alt="DiffusionNFT desert fashion result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/07-desert-fashion/flowgrpo.jpg" data-caption="FlowGRPO · Desert fashion"><span>FlowGRPO</span><img src="assets/comparisons/07-desert-fashion/flowgrpo.jpg" alt="FlowGRPO desert fashion result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/07-desert-fashion/opsd.jpg" data-caption="DiffusionOPSD · Desert fashion"><span>DiffusionOPSD</span><img src="assets/comparisons/07-desert-fashion/opsd.jpg" alt="DiffusionOPSD desert fashion result" width="760" height="760" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 08</span><p>Titanic dormant mech standing in a harbor, towering over cargo ships and cranes under dramatic overcast light.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/08-mech/base.jpg" data-caption="Base · Harbor mech"><span>Base</span><img src="assets/comparisons/08-mech/base.jpg" alt="Base model harbor mech result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/08-mech/refl.jpg" data-caption="ReFL · Harbor mech"><span>ReFL</span><img src="assets/comparisons/08-mech/refl.jpg" alt="ReFL harbor mech result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/08-mech/nft.jpg" data-caption="DiffusionNFT · Harbor mech"><span>DiffusionNFT</span><img src="assets/comparisons/08-mech/nft.jpg" alt="DiffusionNFT harbor mech result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/08-mech/flowgrpo.jpg" data-caption="FlowGRPO · Harbor mech"><span>FlowGRPO</span><img src="assets/comparisons/08-mech/flowgrpo.jpg" alt="FlowGRPO harbor mech result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/08-mech/opsd.jpg" data-caption="DiffusionOPSD · Harbor mech"><span>DiffusionOPSD</span><img src="assets/comparisons/08-mech/opsd.jpg" alt="DiffusionOPSD harbor mech result" width="760" height="760" loading="lazy"></button>
+              </div>
+            </article>
+
+            <article class="comparison-slide" data-comparison-slide aria-hidden="true">
+              <div class="comparison-prompt"><span>Prompt 09</span><p>Giant storm waves crash into a very old, weathered lighthouse, with sea spray rising above the tower under dramatic grey ocean light.</p></div>
+              <div class="comparison-images">
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/09-lighthouse/base.jpg" data-caption="Base · Storm lighthouse"><span>Base</span><img src="assets/comparisons/09-lighthouse/base.jpg" alt="Base model storm lighthouse result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/09-lighthouse/refl.jpg" data-caption="ReFL · Storm lighthouse"><span>ReFL</span><img src="assets/comparisons/09-lighthouse/refl.jpg" alt="ReFL storm lighthouse result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/09-lighthouse/nft.jpg" data-caption="DiffusionNFT · Storm lighthouse"><span>DiffusionNFT</span><img src="assets/comparisons/09-lighthouse/nft.jpg" alt="DiffusionNFT storm lighthouse result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image" type="button" data-lightbox="assets/comparisons/09-lighthouse/flowgrpo.jpg" data-caption="FlowGRPO · Storm lighthouse"><span>FlowGRPO</span><img src="assets/comparisons/09-lighthouse/flowgrpo.jpg" alt="FlowGRPO storm lighthouse result" width="760" height="760" loading="lazy"></button>
+                <button class="comparison-image comparison-image-ours" type="button" data-lightbox="assets/comparisons/09-lighthouse/opsd.jpg" data-caption="DiffusionOPSD · Storm lighthouse"><span>DiffusionOPSD</span><img src="assets/comparisons/09-lighthouse/opsd.jpg" alt="DiffusionOPSD storm lighthouse result" width="760" height="760" loading="lazy"></button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="comparison-dots" role="tablist" aria-label="Choose prompt comparison">
+          <button class="active" type="button" data-comparison-dot="0" role="tab" aria-selected="true" aria-label="Show prompt 1"></button>
+          <button type="button" data-comparison-dot="1" role="tab" aria-selected="false" aria-label="Show prompt 2"></button>
+          <button type="button" data-comparison-dot="2" role="tab" aria-selected="false" aria-label="Show prompt 3"></button>
+          <button type="button" data-comparison-dot="3" role="tab" aria-selected="false" aria-label="Show prompt 4"></button>
+          <button type="button" data-comparison-dot="4" role="tab" aria-selected="false" aria-label="Show prompt 5"></button>
+          <button type="button" data-comparison-dot="5" role="tab" aria-selected="false" aria-label="Show prompt 6"></button>
+          <button type="button" data-comparison-dot="6" role="tab" aria-selected="false" aria-label="Show prompt 7"></button>
+          <button type="button" data-comparison-dot="7" role="tab" aria-selected="false" aria-label="Show prompt 8"></button>
+          <button type="button" data-comparison-dot="8" role="tab" aria-selected="false" aria-label="Show prompt 9"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="showcase-section" aria-labelledby="showcase-title">
+      <div class="showcase-media" aria-hidden="true"></div>
+      <div class="showcase-overlay" aria-hidden="true"></div>
+      <div class="showcase-copy reveal">
+        <p class="kicker light">Creativity unleashed</p>
+        <h2 id="showcase-title">A diverse collection generated by DiffusionOPSD</h2>
+        <p>From photorealism and typography to instructional graphics and fantastical scenes, one training paradigm supports a broad range of creative objectives.</p>
+        <a class="button button-solid" href="#gallery">View Gallery</a>
+      </div>
+    </section>
+
+    <section class="citation-section" aria-label="Citation">
+      <div class="citation-box reveal">
+        <div class="citation-heading">
+          <p class="kicker">Citation</p>
+          <button class="button button-dark" id="copy-citation" type="button">Copy BibTeX</button>
+        </div>
+        <p class="citation-reference">DiffusionOPSD Team. “On-Policy Self-Distillation in Diffusion Models.” Technical report, ByteDance Seed, 2026.</p>
+        <pre><code id="citation-code">@techreport{diffusionopsd2026,
+  title       = {On-Policy Self-Distillation in Diffusion Models},
+  author      = {{DiffusionOPSD Team}},
+  institution = {ByteDance Seed},
+  year        = {2026},
+  month       = {August},
+  url         = {https://diffusionopsd.github.io/}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="footer-brand" href="#overview" aria-label="Back to DiffusionOPSD overview">
+      <img src="assets/seed-logo.png" alt="ByteDance Seed" width="248" height="45">
+    </a>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lightbox-caption">
+    <button class="lightbox-close" type="button" aria-label="Close image">×</button>
+    <div class="lightbox-content">
+      <img id="lightbox-image" src="assets/method-overview.png" alt="">
+      <p id="lightbox-caption"></p>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">BibTeX copied</div>
+  <script src="charts.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
