@@ -298,6 +298,8 @@ img { display: block; max-width: 100%; height: auto; }
 }
 .button-solid { background: #fff; color: #161a25; }
 .button-solid:hover { background: #e9f9fa; }
+.button-placeholder { cursor: default; opacity: .72; }
+.button-placeholder:hover { transform: none; background: #fff; }
 .button-glass {
   color: #fff;
   background: rgba(255,255,255,.1);
