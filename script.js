@@ -1,6 +1,165 @@
 const header = document.querySelector('#site-header');
 const menuButton = document.querySelector('.menu-button');
 const mobileNav = document.querySelector('#mobile-nav');
+const hero = document.querySelector('.hero');
+const heroMosaic = document.querySelector('[data-hero-mosaic]');
+const heroMosaicStage = document.querySelector('[data-hero-mosaic-stage]');
+const heroMedia = hero?.querySelector('.hero-media');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (hero && heroMosaicStage && !prefersReducedMotion) {
+  let heroFrame = null;
+  const setHeroParallax = (x, y) => {
+    if (heroFrame) cancelAnimationFrame(heroFrame);
+    heroFrame = requestAnimationFrame(() => {
+      heroMosaicStage.style.setProperty('--pointer-x', `${x.toFixed(2)}px`);
+      heroMosaicStage.style.setProperty('--pointer-y', `${y.toFixed(2)}px`);
+    });
+  };
+  hero.addEventListener('pointermove', (event) => {
+    const bounds = hero.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) / bounds.width - .5) * -12;
+    const y = ((event.clientY - bounds.top) / bounds.height - .5) * -8;
+    setHeroParallax(x, y);
+  });
+  hero.addEventListener('pointerleave', () => setHeroParallax(0, 0));
+}
+
+if (heroMedia && heroMosaic && !prefersReducedMotion) {
+  const heroTiles = [...heroMosaic.querySelectorAll('.hero-tile')];
+  const altSceneUrls = heroTiles.map((_, index) => `assets/hero-mosaic-alt/${String(index + 1).padStart(2, '0')}.jpg`);
+
+  const preloadAltScene = () => Promise.all(altSceneUrls.map((url) => new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve({ image, url });
+    image.onerror = () => resolve(null);
+    image.src = url;
+  })));
+
+  const startHeroSceneLoop = async () => {
+    const loaded = await preloadAltScene();
+    if (loaded.some((asset) => !asset)) return;
+
+    const gap = 4;
+    const moveDuration = 2250;
+    const dwellDuration = 950;
+    const rows = [...heroMosaic.querySelectorAll('.hero-mosaic-row')];
+    let imageSequence = heroTiles.length;
+
+    const createTile = (url, fraction) => {
+      const tile = document.createElement('span');
+      const image = document.createElement('img');
+      tile.className = 'hero-tile';
+      tile.dataset.carouselFraction = String(fraction);
+      tile.style.setProperty('--i', String(imageSequence++));
+      image.src = url;
+      image.alt = '';
+      image.decoding = 'async';
+      image.setAttribute('aria-hidden', 'true');
+      tile.appendChild(image);
+      return tile;
+    };
+
+    const rowStates = rows.map((row, rowIndex) => {
+      const visible = [...row.children].filter((element) => element.classList.contains('hero-tile'));
+      const weights = visible.map((tile) => Number.parseFloat(tile.style.getPropertyValue('--w')) || 1);
+      const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+      const primaryUrls = visible.map((tile) => tile.querySelector('img').getAttribute('src'));
+      const alternateUrls = loaded.slice(rowIndex * visible.length, (rowIndex + 1) * visible.length).map((asset) => asset.url);
+      const track = document.createElement('div');
+
+      visible.forEach((tile, index) => {
+        tile.dataset.carouselFraction = String(weights[index] / totalWeight);
+        track.appendChild(tile);
+      });
+      track.className = 'hero-row-track';
+      row.appendChild(track);
+      row.classList.add('is-carousel-row');
+
+      return {
+        row,
+        track,
+        visible,
+        pool: [...alternateUrls, ...primaryUrls],
+        cursor: 0,
+        moving: false,
+        resizePending: false,
+      };
+    });
+
+    const sizeStateTiles = (state) => {
+      const tiles = [...state.track.querySelectorAll('.hero-tile')];
+      const availableWidth = Math.max(state.row.clientWidth - gap * 6, 1);
+      tiles.forEach((tile) => {
+        const fraction = Number.parseFloat(tile.dataset.carouselFraction) || (1 / 7);
+        tile.style.flexBasis = `${fraction * availableWidth}px`;
+      });
+    };
+    rowStates.forEach(sizeStateTiles);
+    heroMedia.classList.add('has-tile-carousel');
+
+    const advanceRows = () => {
+      rowStates.forEach((state) => {
+        const outgoing = state.visible[state.visible.length - 1];
+        const fraction = Number.parseFloat(outgoing.dataset.carouselFraction) || (1 / 7);
+        const url = state.pool[state.cursor % state.pool.length];
+        const incoming = createTile(url, fraction);
+        state.cursor += 1;
+        state.track.prepend(incoming);
+        sizeStateTiles(state);
+        const incomingWidth = incoming.getBoundingClientRect().width;
+        state.track.classList.remove('is-moving');
+        state.track.style.transform = `translate3d(-${incomingWidth + gap}px, 0, 0)`;
+        state.incoming = incoming;
+        state.outgoing = outgoing;
+        state.moving = true;
+      });
+
+      void heroMosaic.offsetWidth;
+      rowStates.forEach((state) => state.track.classList.add('is-moving'));
+      requestAnimationFrame(() => {
+        rowStates.forEach((state) => {
+          state.track.style.transform = 'translate3d(0, 0, 0)';
+        });
+      });
+
+      window.setTimeout(() => {
+        rowStates.forEach((state) => {
+          state.track.classList.remove('is-moving');
+          state.outgoing.remove();
+          state.visible = [state.incoming, ...state.visible.slice(0, -1)];
+          state.track.style.transform = 'translate3d(0, 0, 0)';
+          state.moving = false;
+          if (state.resizePending) {
+            sizeStateTiles(state);
+            state.resizePending = false;
+          }
+        });
+        window.setTimeout(advanceRows, dwellDuration);
+      }, moveDuration + 80);
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      rowStates.forEach((state) => {
+        if (state.moving) state.resizePending = true;
+        else sizeStateTiles(state);
+      });
+    });
+    rows.forEach((row) => resizeObserver.observe(row));
+    window.setTimeout(advanceRows, 4200);
+  };
+
+  const scheduleHeroScene = () => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(startHeroSceneLoop, { timeout: 1600 });
+    } else {
+      window.setTimeout(startHeroSceneLoop, 300);
+    }
+  };
+
+  if (document.readyState === 'complete') scheduleHeroScene();
+  else window.addEventListener('load', scheduleHeroScene, { once: true });
+}
 const navLinks = [...document.querySelectorAll('.desktop-nav a, .mobile-nav a[href^="#"]')];
 
 const setHeaderState = () => {
