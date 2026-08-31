@@ -1113,9 +1113,9 @@ img { display: block; max-width: 100%; height: auto; }
   align-items: center;
   justify-content: space-between;
   gap: 28px;
+  margin-bottom: 20px;
 }
 .citation-heading .kicker { margin: 0; }
-.citation-reference { margin: 20px 0 16px; color: var(--muted); line-height: 1.6; }
 .citation-box pre {
   margin: 0;
   padding: 24px 26px;
@@ -1326,7 +1326,6 @@ img { display: block; max-width: 100%; height: auto; }
   .citation-box { padding: 22px 18px 18px; }
   .citation-heading { gap: 14px; }
   .citation-heading .button { min-height: 38px; padding: 0 14px; font-size: 12px; }
-  .citation-reference { font-size: 13px; }
   .citation-box pre { padding: 18px; font-size: 11px; }
   .site-footer { min-height: 120px; padding: 36px 24px; }
   .footer-brand { width: 218px; }
