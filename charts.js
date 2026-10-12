@@ -1,6 +1,7 @@
 (() => {
   const NS = 'http://www.w3.org/2000/svg';
   const METHOD_STYLE = {
+    opsd_star: { color: '#B0448C', dash: '12 7', marker: 'star', width: 3.2 },
     opsd: { color: '#1E5AAA', dash: '', marker: 'circle', width: 3.4 },
     refl: { color: '#CEA831', dash: '12 6 2 6', marker: 'triangle', width: 2.35 },
     flowgrpo: { color: '#5087F2', dash: '2 7', marker: 'diamond', width: 2.35 },
@@ -67,6 +68,14 @@
     if (shape === 'square') return add(parent, 'rect', { ...common, x: x - size, y: y - size, width: size * 2, height: size * 2 });
     if (shape === 'diamond') {
       return add(parent, 'path', { ...common, d: `M${x},${y - size * 1.25}L${x + size * 1.25},${y}L${x},${y + size * 1.25}L${x - size * 1.25},${y}Z` });
+    }
+    if (shape === 'star') {
+      const vertices = Array.from({ length: 10 }, (_, index) => {
+        const angle = -Math.PI / 2 + index * Math.PI / 5;
+        const radius = size * (index % 2 ? .5 : 1.35);
+        return `${x + Math.cos(angle) * radius},${y + Math.sin(angle) * radius}`;
+      });
+      return add(parent, 'path', { ...common, d: `M${vertices.join('L')}Z` });
     }
     return add(parent, 'path', { ...common, d: `M${x},${y - size * 1.3}L${x + size * 1.2},${y + size}L${x - size * 1.2},${y + size}Z` });
   };
@@ -223,8 +232,8 @@
       panels.forEach((panel, panelIndex) => {
         const box = boxes[panelIndex];
         const { sx, sy } = drawAxes(svg, box, {
-          xDomain: [0, 100], yDomain: data.y_range,
-          xTicks: [0, 20, 40, 60, 80, 100], yTicks: [-.2, 0, .2, .4, .6, .8, 1],
+          xDomain: [0, 100], yDomain: data[panel.key].y_range,
+          xTicks: [0, 20, 40, 60, 80, 100], yTicks: [0, .2, .4, .6, .8, 1],
           xLabel: 'Average Normalized Cumulative GPU-Hours (%)', yLabel: panel.yLabel,
         });
         add(svg, 'line', { x1: box.x, x2: box.x + box.w, y1: sy(1), y2: sy(1), stroke: '#787878', 'stroke-width': 1.1, 'stroke-dasharray': '5 5' });
@@ -233,21 +242,22 @@
           if (!active.has(method)) return;
           const series = data[panel.key].methods[method];
           if (!series) return;
+          const xs = series.x;
           const low = series.mean.map((value, index) => value === null ? null : value - series.se[index]);
           const high = series.mean.map((value, index) => value === null ? null : value + series.se[index]);
-          add(plot, 'path', { d: areaPath(data.x, low, high, sx, sy), fill: `url(#aggregate-dots-${method})`, opacity: .62 });
-          add(plot, 'path', { d: linePath(data.x, low, sx, sy), fill: 'none', stroke: METHOD_STYLE[method].color, 'stroke-width': .9, 'stroke-dasharray': '2 5', opacity: .75 });
-          add(plot, 'path', { d: linePath(data.x, high, sx, sy), fill: 'none', stroke: METHOD_STYLE[method].color, 'stroke-width': .9, 'stroke-dasharray': '2 5', opacity: .75 });
-          drawSeries({ svg, group: plot, xs: data.x, ys: series.mean, sx, sy, method, clip: `url(#aggregate-clip-${panelIndex})`, markerEvery: 10 });
+          add(plot, 'path', { d: areaPath(xs, low, high, sx, sy), fill: `url(#aggregate-dots-${method})`, opacity: .62 });
+          add(plot, 'path', { d: linePath(xs, low, sx, sy), fill: 'none', stroke: METHOD_STYLE[method].color, 'stroke-width': .9, 'stroke-dasharray': '2 5', opacity: .75 });
+          add(plot, 'path', { d: linePath(xs, high, sx, sy), fill: 'none', stroke: METHOD_STYLE[method].color, 'stroke-width': .9, 'stroke-dasharray': '2 5', opacity: .75 });
+          drawSeries({ svg, group: plot, xs, ys: series.mean, sx, sy, method, clip: `url(#aggregate-clip-${panelIndex})`, markerEvery: 10 });
           const last = series.mean.reduce((found, value, index) => Number.isFinite(value) ? index : found, -1);
           if (last >= 0) {
             const offsets = panel.key === 'native'
               ? { opsd: -8, refl: 1, flowgrpo: -4, nft: 10 }
               : { opsd: -8, refl: 0, flowgrpo: -4, nft: 10 };
-            const atRightEdge = sx(data.x[last]) > box.x + box.w - 88;
+            const atRightEdge = sx(xs[last]) > box.x + box.w - 88;
             add(svg, 'text', {
-              x: atRightEdge ? box.x + box.w - 6 : sx(data.x[last]) + 8,
-              y: sy(series.mean[last]) + offsets[method],
+              x: atRightEdge ? box.x + box.w - 6 : sx(xs[last]) + 8,
+              y: sy(series.mean[last]) + (offsets[method] ?? -8),
               fill: METHOD_STYLE[method].color,
               'font-size': 11,
               'font-weight': 700,
@@ -264,13 +274,13 @@
         addHoverRegion({
           svg, card, box, xDomain: [0, 100], crosshair,
           onMove: (event, value) => {
-            const index = Math.max(0, Math.min(data.x.length - 1, Math.round(value)));
-            const rows = methods.filter((method) => active.has(method) && Number.isFinite(data[panel.key].methods[method]?.mean[index])).map((method) => ({
-              color: METHOD_STYLE[method].color,
-              label: labels[method],
-              value: fmt(data[panel.key].methods[method].mean[index], 3),
-            }));
-            showTooltip(card, event, `${panel.key === 'native' ? 'Native' : 'Held-out'} · ${index}% budget`, rows);
+            const rows = methods.filter(method => active.has(method)).flatMap(method => {
+              const series = data[panel.key].methods[method];
+              if (!series || value > series.x.at(-1)) return [];
+              const index = series.x.reduce((best, x, i) => Math.abs(x - value) < Math.abs(series.x[best] - value) ? i : best, 0);
+              return [{ color: METHOD_STYLE[method].color, label: labels[method], value: fmt(series.mean[index], 3) }];
+            });
+            showTooltip(card, event, `${panel.key === 'native' ? 'Native' : 'Held-out'} · ${fmt(value, 1)}% compute`, rows);
           },
         });
       });
@@ -307,8 +317,8 @@
       });
 
       const axesB = drawAxes(svg, boxes[1], {
-        xDomain: [-.45, 3.45], yDomain: [0, 108], xTicks: [0, 1, 2, 3], yTicks: [0, 20, 40, 60, 80, 100],
-        xTickLabels: ['OPSD', 'ReFL', 'NFT', 'Flow'], title: 'Cell-wise terminal stability', yLabel: 'Final range position (%)',
+        xDomain: [-.45, methods.length - .55], yDomain: [0, 108], xTicks: methods.map((_, i) => i), yTicks: [0, 20, 40, 60, 80, 100],
+        xTickLabels: methods.map(method => ({ opsd: 'OPSD', refl: 'ReFL', nft: 'NFT', flowgrpo: 'Flow', opsd_star: 'OPSD*' })[method]), title: 'Cell-wise terminal stability', yLabel: 'Final range position (%)',
       });
       const plotB = add(svg, 'g', { 'clip-path': 'url(#robustness-clip-1)' });
       methods.forEach((method, methodIndex) => {
@@ -323,8 +333,8 @@
       });
 
       const multiRange = data.multi_y_range;
-      const yMin = Math.floor(multiRange[0] * 10) / 10;
-      const yMax = Math.ceil(multiRange[1] * 10) / 10;
+      const yMin = Math.ceil(multiRange[0] * 10) / 10;
+      const yMax = Math.floor(multiRange[1] * 10) / 10;
       const yTicksC = [];
       for (let value = yMin; value <= yMax + .001; value += .1) yTicksC.push(Number(value.toFixed(1)));
       const axesC = drawAxes(svg, boxes[2], {
@@ -336,7 +346,7 @@
         if (!active.has(method) || !data.multi[method]) return;
         const series = data.multi[method];
         drawSeries({ svg, group: plotC, xs: series.epoch, ys: series.raw, sx: axesC.sx, sy: axesC.sy, method, clip: 'url(#robustness-clip-2)', markerEvery: 0, raw: true });
-        drawSeries({ svg, group: plotC, xs: series.epoch, ys: series.smooth, sx: axesC.sx, sy: axesC.sy, method, clip: 'url(#robustness-clip-2)', markerEvery: 25 });
+        drawSeries({ svg, group: plotC, xs: series.epoch, ys: series.smooth, sx: axesC.sx, sy: axesC.sy, method, clip: 'url(#robustness-clip-2)', markerEvery: 30 });
       });
 
       const crossA = add(svg, 'line', { y1: boxes[0].y, y2: boxes[0].y + boxes[0].h, stroke: NAVY, 'stroke-width': 1, 'stroke-dasharray': '3 4', opacity: 0, 'pointer-events': 'none' });
@@ -347,8 +357,8 @@
       }});
 
       const crossB = add(svg, 'line', { y1: boxes[1].y, y2: boxes[1].y + boxes[1].h, stroke: NAVY, 'stroke-width': 1, 'stroke-dasharray': '3 4', opacity: 0, 'pointer-events': 'none' });
-      addHoverRegion({ svg, card, box: boxes[1], xDomain: [-.45, 3.45], crosshair: crossB, onMove: (event, value) => {
-        const index = Math.max(0, Math.min(3, Math.round(value)));
+      addHoverRegion({ svg, card, box: boxes[1], xDomain: [-.45, methods.length - .55], crosshair: crossB, onMove: (event, value) => {
+        const index = Math.max(0, Math.min(methods.length - 1, Math.round(value)));
         const method = methods[index];
         const terminal = data.terminal[method];
         crossB.setAttribute('x1', axesB.sx(index)); crossB.setAttribute('x2', axesB.sx(index));

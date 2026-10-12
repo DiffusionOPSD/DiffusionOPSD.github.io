@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="blog-entry.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -149,6 +150,10 @@
           <svg class="button-icon" aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3 10.7 9-7.2 9 7.2M5.5 9.2v10.3h13V9.2M9.5 19.5v-6h5v6"/></svg>
           <span>Explore Method</span>
         </a>
+        <a class="button button-glass" href="blog/v2/">
+          <svg class="button-icon" aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 4h10l4 4v12H5V4Zm10 0v5h4M9 13h6M9 17h6"/></svg>
+          <span>V2 Blog</span>
+        </a>
       </div>
 
       <a class="scroll-cue" href="#method" aria-label="Scroll to method">
@@ -250,7 +255,7 @@
               <button type="button" class="leaderboard-tab active" data-backbone-filter="sd35" aria-pressed="true"><span class="tab-icon tab-icon-sd" aria-hidden="true">S</span>SD3.5-M</button>
               <button type="button" class="leaderboard-tab" data-backbone-filter="zimage" aria-pressed="false"><span class="tab-icon tab-icon-z" aria-hidden="true">Z</span>Z-Image-Turbo</button>
             </div>
-            <span class="leaderboard-summary" id="leaderboard-summary" aria-live="polite">17 methods</span>
+            <span class="leaderboard-summary" id="leaderboard-summary" aria-live="polite">21 methods</span>
           </div>
 
           <div class="leaderboard-panel">
@@ -307,10 +312,19 @@
                     <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT <sup>‡</sup></span></span></th><td>×</td><td>1.7k</td><td>23.80</td><td>0.293</td><td>0.331</td><td>6.01</td><td>1.49</td><td>7.48</td><td>4.34</td><td>0.398</td><td>0.111</td><td>0.296</td>
                   </tr>
                   <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft joint multi reward 300">
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td>×</td><td>300</td><td>23.62</td><td>0.294</td><td>0.340</td><td>6.02</td><td>1.45</td><td>8.36</td><td>4.32</td><td>0.397</td><td>0.150</td><td>0.294</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td>×</td><td>300</td><td>23.62</td><td>0.294</td><td>0.340</td><td><u>6.02</u></td><td>1.45</td><td>8.36</td><td>4.32</td><td>0.397</td><td>0.150</td><td>0.294</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="draft joint multi reward 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-dance" aria-hidden="true">D</span><span class="model-copy">+ DRaFT</span></span></th><td>×</td><td>300</td><td>23.83</td><td>0.306</td><td>0.348</td><td>5.97</td><td>1.23</td><td>6.10</td><td>3.24</td><td>0.374</td><td>0.123</td><td>0.247</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="refl joint multi reward 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td>×</td><td>300</td><td>22.61</td><td>0.264</td><td>0.302</td><td>6.01</td><td>0.81</td><td>4.67</td><td>3.57</td><td>0.343</td><td>0.090</td><td>0.176</td>
                   </tr>
                   <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd joint multi reward 300 ours">
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD <small>joint</small></span><span class="ours-pill">ours</span></span></th><td>×</td><td>300</td><td><strong>25.51</strong></td><td><strong>0.333</strong></td><td><strong>0.389</strong></td><td>6.03</td><td>1.51</td><td>9.41</td><td>4.40</td><td>0.399</td><td>0.170</td><td>0.345</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD <small>joint</small></span><span class="ours-pill">ours</span></span></th><td>×</td><td>300</td><td class="score-best">25.51</td><td class="score-best">0.333</td><td class="score-best">0.389</td><td class="score-best">6.03</td><td><u>1.51</u></td><td><u>12.75</u></td><td class="score-best">4.40</td><td><u>0.399</u></td><td><u>0.170</u></td><td><u>0.345</u></td>
+                  </tr>
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd* joint multi reward 300">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD* <small>joint</small></span><span class="ours-pill">ours</span></span></th><td>×</td><td>300</td><td><u>25.42</u></td><td><u>0.332</u></td><td><u>0.386</u></td><td><u>6.02</u></td><td class="score-best">1.55</td><td class="score-best">13.04</td><td><u>4.38</u></td><td class="score-best">0.452</td><td class="score-best">0.173</td><td class="score-best">0.370</td>
                   </tr>
                   <tr data-main-table-row data-backbone="sd35" data-search="danceopd two stage 300">
                     <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-dance" aria-hidden="true">D</span><span class="model-copy">+ DanceOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>23.06</td><td>0.272</td><td>0.322</td><td>5.98</td><td>1.23</td><td>7.24</td><td>4.34</td><td>0.378</td><td>0.127</td><td>0.219</td>
@@ -322,29 +336,34 @@
                     <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flowopd" aria-hidden="true">F</span><span class="model-copy">+ FlowOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>22.62</td><td>0.263</td><td>0.300</td><td>5.98</td><td>0.92</td><td>5.00</td><td>4.20</td><td>0.353</td><td>0.101</td><td>0.166</td>
                   </tr>
                   <tr class="leaderboard-specific-start" data-main-table-row data-backbone="sd35" data-search="refl reward specific 100">
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>23.92</td><td>0.308</td><td>0.358</td><td class="score-best">12.09</td><td>1.28</td><td>9.33</td><td>4.85</td><td>0.408</td><td>0.193</td><td>0.290</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td><u>23.92</u></td><td>0.308</td><td><u>0.358</u></td><td class="score-best">12.09</td><td>1.28</td><td>6.18</td><td><u>4.85</u></td><td>0.408</td><td>0.193</td><td>0.290</td>
                   </tr>
                   <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft reward specific 100">
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>23.43</td><td>0.298</td><td>0.336</td><td>9.11</td><td>1.46</td><td>9.14</td><td>4.76</td><td>0.412</td><td>0.199</td><td>0.323</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>23.43</td><td>0.298</td><td>0.336</td><td>9.11</td><td>1.46</td><td>13.51</td><td>4.76</td><td>0.412</td><td>0.199</td><td>0.323</td>
                   </tr>
                   <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd reward specific 100 ours">
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">24.94</td><td class="score-best">0.340</td><td class="score-best">0.390</td><td>12.08</td><td class="score-best">1.76</td><td class="score-best">13.34</td><td class="score-best">4.94</td><td class="score-best">0.450</td><td class="score-best">0.214</td><td class="score-best">0.465</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">24.94</td><td class="score-best">0.340</td><td class="score-best">0.390</td><td><u>12.08</u></td><td class="score-best">1.76</td><td class="score-best">15.14</td><td class="score-best">4.94</td><td><u>0.450</u></td><td><u>0.214</u></td><td class="score-best">0.465</td>
                   </tr>
-
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="sd35" data-search="diffusionopsd* reward specific 100">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD*</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">24.94</td><td><u>0.327</u></td><td class="score-best">0.390</td><td class="score-best">12.09</td><td><u>1.73</u></td><td><u>14.79</u></td><td>4.81</td><td class="score-best">0.458</td><td class="score-best">0.216</td><td><u>0.463</u></td>
+                  </tr>
                   <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo base" hidden>
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-zimage" aria-hidden="true">Z</span><span class="model-copy">Z-Image-Turbo</span></span></th><td>×</td><td>–</td><td>22.86</td><td>0.276</td><td>0.296</td><td>5.41</td><td>0.96</td><td>6.19</td><td>4.44</td><td>0.392</td><td>0.213</td><td>0.422</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-zimage" aria-hidden="true">Z</span><span class="model-copy">Z-Image-Turbo</span></span></th><td>×</td><td>–</td><td>22.86</td><td>0.276</td><td>0.296</td><td>5.41</td><td>0.96</td><td>11.17</td><td>4.44</td><td>0.392</td><td>0.213</td><td>0.422</td>
                   </tr>
                   <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo flowgrpo reward specific 100" hidden>
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.96</td><td>0.275</td><td>0.305</td><td>5.46</td><td>1.01</td><td>7.11</td><td>4.51</td><td>0.394</td><td>0.217</td><td>0.420</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.96</td><td>0.275</td><td>0.305</td><td>5.46</td><td>1.01</td><td>11.58</td><td>4.51</td><td>0.394</td><td>0.217</td><td>0.420</td>
                   </tr>
                   <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo refl reward specific 100" hidden>
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>24.54</td><td>0.313</td><td>0.380</td><td>9.79</td><td>1.37</td><td>13.77</td><td>4.60</td><td>0.441</td><td>0.227</td><td>0.481</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>24.54</td><td>0.313</td><td>0.380</td><td>9.79</td><td>1.37</td><td>11.32</td><td>4.60</td><td>0.441</td><td>0.227</td><td>0.481</td>
                   </tr>
                   <tr data-main-table-row data-backbone="zimage" data-search="z-image-turbo diffusionnft reward specific 100" hidden>
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.28</td><td>0.280</td><td>0.277</td><td>6.07</td><td>0.58</td><td>1.58</td><td>3.37</td><td>0.363</td><td>0.166</td><td>0.357</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-nft" aria-hidden="true">N</span><span class="model-copy">+ DiffusionNFT</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>22.28</td><td>0.280</td><td>0.277</td><td>6.07</td><td>0.58</td><td>11.01</td><td>3.37</td><td>0.363</td><td>0.166</td><td>0.357</td>
                   </tr>
                   <tr class="leaderboard-row-ours" data-main-table-row data-backbone="zimage" data-search="z-image-turbo diffusionopsd reward specific 100 ours" hidden>
-                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">25.15</td><td class="score-best">0.320</td><td class="score-best">0.390</td><td class="score-best">10.74</td><td class="score-best">1.79</td><td class="score-best">14.44</td><td class="score-best">4.78</td><td class="score-best">0.451</td><td class="score-best">0.243</td><td class="score-best">0.551</td>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td><u>25.15</u></td><td class="score-best">0.320</td><td class="score-best">0.390</td><td><u>10.74</u></td><td class="score-best">1.79</td><td class="score-best">15.59</td><td class="score-best">4.78</td><td><u>0.451</u></td><td><u>0.243</u></td><td class="score-best">0.551</td>
+                  </tr>
+                  <tr class="leaderboard-row-ours" data-main-table-row data-backbone="zimage" data-search="diffusionopsd* reward specific 100" hidden>
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-opsd" aria-hidden="true">O</span><span class="model-copy">+ DiffusionOPSD*</span><span class="ours-pill">ours</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td class="score-best">25.28</td><td><u>0.314</u></td><td><u>0.386</u></td><td class="score-best">10.80</td><td><u>1.76</u></td><td><u>15.51</u></td><td><u>4.77</u></td><td class="score-best">0.459</td><td class="score-best">0.249</td><td><u>0.549</u></td>
                   </tr>
                 </tbody>
               </table>
@@ -363,6 +382,7 @@
             <p class="mini-label">Normalized progress</p>
             <h3>DiffusionOPSD improves fastest and finishes highest.</h3>
             <p>Training reward and held-out quality are reported separately, while cumulative GPU-hours provide a common compute axis across methods.</p>
+            <p><strong>DiffusionOPSD*</strong> is the accelerated version. See the <a href="blog/v2/">V2 Blog</a> for the improvements.</p>
             <div class="legend-list" aria-label="Methods in chart">
               <span><i class="legend opsd"></i>DiffusionOPSD</span>
               <span><i class="legend refl"></i>ReFL</span>
@@ -377,7 +397,7 @@
             </div>
             <div class="chart-stage">
               <div class="chart-canvas" id="aggregate-chart" role="img" aria-label="Interactive native training and held-out quality gain curves"></div>
-              <img class="chart-fallback" src="assets/training-curves.png" alt="Training and held-out quality curves comparing DiffusionOPSD against baselines" width="1505" height="472" loading="lazy">
+              <img class="chart-fallback" src="assets/training-curves.png" alt="Training and held-out quality curves comparing DiffusionOPSD and DiffusionOPSD* against baselines" width="4090" height="1779" loading="lazy">
               <div class="chart-tooltip" role="status" aria-live="polite"></div>
             </div>
           </div>
@@ -513,7 +533,7 @@
               </div>
               <div class="chart-stage">
                 <div class="chart-canvas" id="robustness-chart" role="img" aria-label="Interactive robustness, terminal stability, and multi-reward plots"></div>
-                <img class="chart-fallback" src="assets/robustness.png" alt="Figure 7 shared-reference gain, terminal stability, and multi-reward composite results" width="4808" height="1728" loading="lazy">
+                <img class="chart-fallback" src="assets/robustness.png" alt="Figure 7 shared-reference gain, terminal stability, and multi-reward composite results including DiffusionOPSD*" width="3686" height="1325" loading="lazy">
                 <div class="chart-tooltip" role="status" aria-live="polite"></div>
               </div>
             </div>

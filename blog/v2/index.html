@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DiffusionOPSD v2: one reward-ascent step for target construction, broader prompt coverage, query-prefix rollouts, and corrected HPSv3 rewards. Explore the training curves and updated Table 1.">
+  <meta name="theme-color" content="#f8faff">
+  <title>DiffusionOPSD v2 — Less compute, broader exploration</title>
+  <link rel="icon" href="../../assets/favicon.ico">
+  <link rel="stylesheet" href="blog.css">
+  <link rel="stylesheet" href="refinements.css">
+  <script src="blog.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to article</a>
+  <header class="site-header">
+    <a class="wordmark" href="../../" aria-label="DiffusionOPSD home"><img class="brand-seed" src="../../assets/seed-favicon-180.png" width="32" height="32" alt=""><span>Diffusion<span class="brand-blue">OPSD</span></span></a>
+    <nav aria-label="Article"><a href="#changes">What changed</a><a href="#results">Results</a><a class="back-home" href="../../">Back to home <span aria-hidden="true">↗</span></a></nav>
+    <div id="reading-progress" aria-hidden="true"></div>
+  </header>
+  <main id="main">
+    <header class="article-header prose">
+      <div class="eyebrow"><span class="edition">Research update</span><span>October 12, 2026</span></div>
+      <h1>DiffusionOPSD <span>v2</span></h1>
+      <p class="dek">Less compute. Broader exploration.<br>The same self-distillation principle.</p>
+      <div class="article-actions"><a class="pill primary" href="#changes">Meet the update <span>↓</span></a><a class="pill" href="#curves">Explore the curves <span>↗</span></a><a class="pill" href="#table1">Updated Table 1 <span>↗</span></a><div class="resource-links"><a class="pill" href="https://github.com/worldbench/DiffusionOPSD" target="_blank" rel="noopener">GitHub <span>↗</span></a><a class="pill" href="../../">Project home <span>↗</span></a><a class="pill" href="https://huggingface.co/WeiChow/DiffusionOPSD" aria-label="Hugging Face weights" target="_blank" rel="noopener">Hugging Face <span>↗</span></a></div></div>
+    </header>
+
+    <figure class="hero-figure wide reveal">
+      <div class="version-art" aria-hidden="true">v<span>2</span><i></i></div>
+      <div class="hero-chart"><div class="hero-chart-heading"><span>SD3.5-M · Joint training</span><div class="hero-legend"><span><i class="swatch old"></i>v1</span><span><i class="swatch new"></i>v2</span></div></div><div id="hero-plot" aria-label="Joint training reward by elapsed time"></div><a class="hero-caption" href="#timing-notes">Recorded wall time · 300 updates <span>↗</span></a></div>
+    </figure>
+
+    <div class="prose introduction">
+      <p>DiffusionOPSD turns image-level reward guidance into explicit targets for clean-output predictions at sampled queries. In v2, we keep that principle and make the training recipe more efficient: <strong>one reward-ascent step for target construction, broader prompt coverage, and rollouts that stop at the query.</strong> We also correct the HPSv3 reward pipeline.</p>
+      <p>The controlled experiment preserves held-out performance while reducing training GPU time by approximately <strong>30.5%</strong>. A separate measurement of one complete update with the old and new recipes reduces update time by <strong>39.7%</strong>.</p>
+    </div>
+
+    <section id="changes" class="article-section">
+      <div class="prose section-heading"><h2>Three changes.<br>One correction.</h2><p class="section-intro">Spend less on each target. Explore more prompts. Stop the rollout where training needs it.</p></div>
+
+      <article class="change prose reveal">
+        <div class="change-title"><span class="change-number">01</span><h3>One reward-ascent step for target construction.</h3></div>
+        <p>v1 takes two normalized reward-gradient ascent steps to construct its positive target. v2 takes one, reducing reward-gradient computation while retaining bounded positive and negative targets and finite fitting. Both the behavior-policy EMA and the checkpoint EMA are retained.</p>
+        <div class="before-after ascent-diagram" aria-label="Positive-target construction changes from two reward-ascent steps to one">
+          <div><span class="version-label">V1</span><div class="flow"><b>Anchor</b><i>→</i><b>Ascent 1</b><i>→</i><b>Ascent 2</b></div></div>
+          <div><span class="version-label blue">V2</span><div class="flow"><b>Anchor</b><i>→</i><b class="highlight">Ascent 1</b></div></div>
+        </div>
+      </article>
+
+      <article class="change prose reveal">
+        <div class="change-title"><span class="change-number">02</span><h3>More prompts. The same sample budget.</h3></div>
+        <p>We move from <strong>48 × 24</strong> to <strong>1,152 × 1 × 1</strong>: 1,152 prompt groups, one trajectory per group (K = 1), and one optimizer update per outer iteration. Both recipes collect <strong>1,152 samples</strong> and use a finite fitting budget of one optimizer update per outer iteration. The new allocation trades repeated samples of the same prompt for broader prompt coverage.</p>
+        <p>DiffusionOPSD does not depend on image diversity within each prompt in the same way as FlowGRPO or DiffusionNFT. We can therefore shift the sampling budget to <strong>diversity across prompts</strong>, with one trajectory per prompt. In our experiments, this allocation also produces <strong>more stable training reward curves</strong>.</p>
+        <div class="allocation">
+          <div><span class="version-label">V1</span><strong>48 <em>×</em> 24</strong><div class="sample-grid old-grid" aria-hidden="true"></div></div>
+          <div><span class="version-label blue">V2</span><strong>1,152 <em>×</em> 1 <em>×</em> 1</strong><div class="sample-grid new-grid" aria-hidden="true"></div></div>
+        </div>
+      </article>
+
+      <article class="change prose reveal">
+        <div class="change-title"><span class="change-number">03</span><h3>Stop the rollout at the query.</h3></div>
+        <p>DiffusionOPSD fits detached targets for clean-output predictions at sampled low-noise queries. With K = 1, the group-normalized fitting weight is fixed at 0.5, so finite fitting no longer requires the rollout endpoint. The v2 <strong>query-prefix rollout</strong> collects the required query state and clean-output anchor, then skips the remaining denoising, endpoint decoding, and endpoint reward evaluation.</p>
+        <div class="prefix-diagram" aria-label="Query prefix retains the trajectory through the query and skips subsequent endpoint computation">
+          <div class="prefix-labels"><span>Noise</span><span class="blue">Training query</span><span>Image endpoint</span></div>
+          <div class="trajectory"><i></i><i></i><i></i><i class="query"></i><i class="unused"></i><i class="unused"></i><i class="unused"></i></div>
+          <div class="prefix-labels bottom"><span>Keep the prefix</span><span class="blue">Target construction → finite fitting</span><span>Skip the suffix</span></div>
+        </div>
+      </article>
+
+      <article class="change prose reward-fix reveal">
+        <div class="change-title"><span class="change-number">+1</span><h3>Correct the HPSv3 reward pipeline.</h3></div>
+        <p>The previous differentiable preprocessing path omitted CLIP mean/std normalization. This affects reward values, image gradients, and the resulting reward-gradient targets. v2 uses the official differentiable preprocessing with normalization; evaluation uses the official reward API and its unscaled <code>logits[:, 0]</code>.</p>
+        <div class="reward-flow"><span>Image</span><i>→</i><strong>CLIP normalization</strong><i>→</i><span>HPSv3 reward</span></div>
+      </article>
+    </section>
+
+    <section id="results" class="article-section">
+      <div class="prose section-heading"><h2>Less time training.<br>More room to explore.</h2></div>
+      <div class="efficiency wide reveal">
+        <div class="efficiency-item"><strong>−30.5<span>%</span></strong><h3>Training GPU time</h3><p>A controlled 50-update experiment.<br>SD3.5-M · CLIPScore</p></div>
+        <div class="efficiency-item"><strong>−39.7<span>%</span></strong><h3>Time per update</h3><div class="timing-row"><span>v1</span><div><i style="--length:100%"></i></div><b>133.926 s</b></div><div class="timing-row current"><span>v2</span><div><i style="--length:60.3%"></i></div><b>80.759 s</b></div><p>One complete update, measured on 8 × A100.</p></div>
+      </div>
+
+      <div id="curves" class="prose subsection"><h2>The curves, before and after.</h2><p>Explore every reward-specific run on SD3.5-M and Z-Image-Turbo, plus the SD3.5-M joint run. v2 is designed for more stable training; the raw traces below let you inspect the behavior reward by reward.</p></div>
+      <div class="curve-explorer wide">
+        <div class="explorer-top"><h3>Training curves</h3><a class="text-link" href="data.json" download="opsd-v2-data.json">Download data <span>↓</span></a></div>
+        <div class="toolbar">
+          <div class="segmented" role="group" aria-label="Curve backbone"><button data-backbone="sd35m" aria-pressed="true">SD3.5-M</button><button data-backbone="zimage" aria-pressed="false">Z-Image-Turbo</button><button data-backbone="joint" aria-pressed="false">Joint training</button></div>
+          <label class="select-label">Plot <select id="curve-metric" aria-label="Curve metric"><option value="reward">Training reward</option><option value="loss">Total training loss</option><option value="positive">Positive fitting loss</option><option value="negative">Negative fitting loss</option></select></label>
+        </div>
+        <div class="plot-options"><div class="legends"><button data-series="v1" aria-label="DiffusionOPSD v1" aria-pressed="true"><i class="swatch old"></i>v1</button><button data-series="v2" aria-label="DiffusionOPSD v2" aria-pressed="true"><i class="swatch new"></i>v2</button></div><div><label class="smooth-label" title="Exponential moving average (0.6)"><input id="smooth" type="checkbox"> Smooth</label><button id="replay" class="replay" aria-label="Replay curve animation">↻ Replay</button></div></div>
+        <div id="curve-grid" class="curve-grid" aria-live="polite"><p class="loading">Loading recorded training traces…</p></div>
+      </div>
+      <div class="prose snapshot-note" id="snapshot-note" role="status"></div>
+
+      <div id="table1" class="prose subsection"><h2>Table 1, updated.</h2><p>The held-out results match Table 1 of the paper. Each reward-specific cell evaluates its own trained checkpoint; joint rows evaluate one checkpoint across all ten metrics.</p></div>
+      <div class="table-panel wide">
+        <div class="explorer-top"><h3>Quality across ten evaluators</h3><button id="download-table" class="text-link">Download CSV ↓</button></div>
+        <div class="toolbar"><div class="segmented" role="group" aria-label="Table backbone"><button data-table-backbone="sd35m" aria-pressed="true">SD3.5-M</button><button data-table-backbone="zimage" aria-pressed="false">Z-Image-Turbo</button></div><div class="segmented" role="group" aria-label="Table rows"><button data-table-scope="opsd" aria-pressed="true">DiffusionOPSD</button><button data-table-scope="all" aria-pressed="false">Full Table 1</button></div></div>
+        <div class="table-scroll" tabindex="0" aria-label="Table 1; scroll horizontally for all evaluators"><table id="results-table"><caption class="sr-only">Table 1: published and updated held-out evaluator scores</caption><thead></thead><tbody></tbody></table></div>
+      </div>
+      <details class="experiment-notes prose" id="experiment-notes">
+        <summary>Experiment notes <span aria-hidden="true">+</span></summary>
+        <div class="notes-body">
+          <h4 id="timing-notes">Timing</h4>
+          <p>The joint-training overview uses elapsed W&B run time, including initialization, evaluation and checkpoint overhead. These historical runs are not a controlled speed benchmark. The 30.5% reduction measures training GPU time in the controlled experiment, excluding initialization, checkpoint writing and evaluation. The separate 39.7% measurement compares one complete update on the same host with 8 × A100, SD3.5-M and CLIPScore; it is not a full-run speed estimate.</p>
+          <h4>Reading the curves</h4>
+          <p>v1 records rollout endpoint reward; v2 records local reward at the clean-output anchor, so their levels are not directly comparable quality scores. Epochs are zero-based. Raw traces are shown by default; optional smoothing uses EMA 0.6. Hover, tap, or use ← / → to inspect.</p>
+          <p id="snapshot-details"></p>
+          <h4 id="evaluation-notes">Evaluation and HPSv3</h4>
+          <p>All v2 evaluations use 1,000 images from 200 DrawBench prompts. Historical training seeds are not uniformly matched to v2 seed 42. Hover a table cell for its source or the difference from v1 at displayed precision. Higher scores are better; ‡ marks published reference results and † two-stage OPD.</p>
+          <p>The HPSv3 v1 training curve uses the corrected old-recipe rerun. <a href="https://github.com/MizzenAI/HPSv3" target="_blank" rel="noopener">Official HPSv3 implementation ↗</a></p>
+        </div>
+      </details>
+      <div class="prose closing"><p>The update keeps the central idea intact: construct bounded positive and negative targets from reward gradients, fit them as detached supervision through finite fitting, and refresh the behavior policy. v2 makes that loop leaner.</p><a class="pill primary" href="../../">Explore DiffusionOPSD <span>↗</span></a></div>
+    </section>
+  </main>
+  <footer><a class="wordmark" href="../../">Diffusion<span class="brand-blue">OPSD</span></a><span>On-Policy Self-Distillation in Diffusion Models</span><a href="#main">Back to top ↑</a></footer>
+  <noscript><p class="prose">Enable JavaScript to explore the training curves and Table 1. <a href="data.json">Download the original chart data.</a></p></noscript>
+</body>
+</html>
