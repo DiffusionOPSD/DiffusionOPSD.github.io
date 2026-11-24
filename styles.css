@@ -710,6 +710,7 @@ img { display: block; max-width: 100%; height: auto; }
 .legend-list { display: flex; flex-wrap: wrap; gap: 9px 16px; margin-top: 26px; color: #4d5463; font-size: 11px; }
 .legend-list span { display: flex; align-items: center; gap: 7px; }
 .legend { width: 19px; height: 3px; border-radius: 2px; background: #2057b3; }
+.legend.opsd-star { background: #b0448c; }
 .legend.refl { background: #d3a522; }
 .legend.flow { background: #558ef2; }
 .legend.nft { background: #53bec7; }

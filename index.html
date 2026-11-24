@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10182d">
-  <meta name="description" content="DiffusionOPSD turns image-level reward guidance into explicit, continually refreshed targets for efficient and diagnosable diffusion post-training.">
+  <meta name="description" content="DiffusionOPSD converts image-level reward guidance into explicit, continually refreshed self-teachers for efficient and diagnosable diffusion post-training.">
   <meta property="og:title" content="DiffusionOPSD — On-Policy Self-Distillation in Diffusion Models">
-  <meta property="og:description" content="A practical on-policy self-distillation framework for efficient and diagnosable diffusion post-training.">
+  <meta property="og:description" content="An on-policy self-distillation framework that converts image-level reward guidance into bounded, continually refreshed self-teachers for diffusion post-training.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/hero.jpg">
   <title>DiffusionOPSD — On-Policy Self-Distillation in Diffusion Models</title>
@@ -129,7 +129,7 @@
         <h1 id="hero-title"><span>Diffusion</span><span class="title-accent">OPSD</span></h1>
         <p class="hero-subtitle">On-Policy Self-Distillation in Diffusion Models</p>
         <p class="hero-description">
-          We convert image-level reward guidance into bounded positive and negative targets for clean-output predictions—then continually refresh that supervision as the behavior policy evolves.
+          We convert image-level reward guidance into bounded positive and negative self-teachers for clean-output predictions—then distill them as detached supervision while an EMA self-teacher continually refreshes.
         </p>
       </div>
 
@@ -170,30 +170,30 @@
             <h2 id="method-title">From endpoint reward to explicit intermediate supervision</h2>
           </div>
           <p>
-            Mainstream endpoint rewards tell us whether an image is good, but not how an intermediate denoising prediction should change. DiffusionOPSD closes this supervision gap by constructing reward-improving targets at sampled low-noise queries.
+            Endpoint rewards indicate whether a final image is good, not how an intermediate denoising prediction should change. DiffusionOPSD closes this gap by synthesizing bounded self-teachers at sampled low-noise queries and distilling them as detached supervision.
           </p>
         </div>
 
-        <button class="figure-button reveal" type="button" data-lightbox="assets/method-overview.png" data-caption="DiffusionOPSD overview: behavior-policy query collection, bounded reward-gradient target construction, detached finite fitting, and EMA refresh.">
-          <img src="assets/method-overview-animated.gif" alt="Animated DiffusionOPSD overview assembled component by component along the training flow" width="1920" height="830">
+        <button class="figure-button reveal" type="button" data-lightbox="assets/method-overview.png" data-caption="DiffusionOPSD overview: EMA self-teacher rollout and anchor collection, bounded local reward-gradient self-teacher synthesis, detached two-sided student distillation, and online EMA self-teacher refresh.">
+          <img src="assets/method-overview-animated.gif" alt="Animated DiffusionOPSD framework overview assembled stage by stage along the training loop" width="1920" height="750">
           <span class="expand-label">Expand final figure <span aria-hidden="true">↗</span></span>
         </button>
 
         <div class="stage-grid">
           <article class="stage-card reveal">
             <span class="stage-number">01</span>
-            <h3>Collect on-policy queries</h3>
-            <p>A frozen behavior policy generates trajectories and supplies low-noise query states and clean-output anchors.</p>
+            <h3>Roll out EMA self-teacher</h3>
+            <p>A frozen EMA self-teacher generates on-policy trajectories and supplies low-noise query states and stationary clean-output anchors.</p>
           </article>
           <article class="stage-card reveal">
             <span class="stage-number">02</span>
-            <h3>Construct bounded targets</h3>
-            <p>Normalized reward ascent and descent create positive and negative targets inside a controlled clean-output radius.</p>
+            <h3>Synthesize bounded self-teachers</h3>
+            <p>Normalized local reward ascent and descent synthesize bounded positive and negative self-teachers inside a controlled clean-output radius.</p>
           </article>
           <article class="stage-card reveal">
             <span class="stage-number">03</span>
-            <h3>Fit, refresh, repeat</h3>
-            <p>The trainable policy fits detached targets under a finite budget; EMA then refreshes the behavior policy for the next iteration.</p>
+            <h3>Distill, refresh, repeat</h3>
+            <p>The student policy distills detached self-teachers under a finite budget—admitting the exact single-branch variant DiffusionOPSD*—before EMA refreshes the self-teacher.</p>
           </article>
         </div>
       </div>
@@ -207,26 +207,26 @@
             <h2 id="results-title">Faster improvement. Stronger held-out quality.</h2>
           </div>
           <p>
-            Matched experiments span SD3.5-M and the step-distilled Z-Image-Turbo, covering ten evaluators and both reward-specific and joint training settings.
+            Matched experiments span SD3.5-M and step-distilled Z-Image-Turbo across ten evaluators, covering single-reward specialists, joint multi-reward policies, and zero-shot compositional and human evaluation.
           </p>
         </div>
 
         <div class="stat-grid reveal" aria-label="Headline results">
           <article class="stat-card stat-primary">
-            <strong><span class="count-up" data-target="19">0</span><span>/20</span></strong>
-            <p>best final held-out scores in reward-matched settings</p>
+            <strong><span class="count-up" data-target="20">0</span><span>/20</span></strong>
+            <p>best held-out scores across all target-reward settings (19/20 individually)</p>
           </article>
           <article class="stat-card">
             <strong>+<span class="count-up" data-target="44">0</span><span>.0%</span></strong>
-            <p>relative gain over the strongest competing method</p>
+            <p>relative gain over the strongest baseline (up to 2.57× ReFL's base-anchored gain)</p>
           </article>
           <article class="stat-card">
-            <strong><span class="count-up" data-target="40">0</span><span>%</span></strong>
-            <p>fewer training GPU-hours than DiffusionNFT on SD3.5-M</p>
+            <strong><span class="count-up" data-target="74">0</span><span>%</span></strong>
+            <p>fewer GPU-hours than DiffusionNFT with DiffusionOPSD* (up to 63% with OPSD)</p>
           </article>
           <article class="stat-card">
-            <strong><span class="count-up" data-target="63">0</span><span>%</span></strong>
-            <p>fewer training GPU-hours than DiffusionNFT on Z-Image-Turbo</p>
+            <strong><span class="count-up" data-target="13">0</span><span>.1×</span></strong>
+            <p>faster to reach baseline terminal quality (up to 90% blinded human win rate)</p>
           </article>
         </div>
 
@@ -255,7 +255,7 @@
               <button type="button" class="leaderboard-tab active" data-backbone-filter="sd35" aria-pressed="true"><span class="tab-icon tab-icon-sd" aria-hidden="true">S</span>SD3.5-M</button>
               <button type="button" class="leaderboard-tab" data-backbone-filter="zimage" aria-pressed="false"><span class="tab-icon tab-icon-z" aria-hidden="true">Z</span>Z-Image-Turbo</button>
             </div>
-            <span class="leaderboard-summary" id="leaderboard-summary" aria-live="polite">21 methods</span>
+            <span class="leaderboard-summary" id="leaderboard-summary" aria-live="polite">22 methods</span>
           </div>
 
           <div class="leaderboard-panel">
@@ -335,7 +335,10 @@
                   <tr data-main-table-row data-backbone="sd35" data-search="flowopd two stage 300">
                     <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flowopd" aria-hidden="true">F</span><span class="model-copy">+ FlowOPD <sup>†</sup></span></span></th><td>×</td><td>300</td><td>22.62</td><td>0.263</td><td>0.300</td><td>5.98</td><td>0.92</td><td>5.00</td><td>4.20</td><td>0.353</td><td>0.101</td><td>0.166</td>
                   </tr>
-                  <tr class="leaderboard-specific-start" data-main-table-row data-backbone="sd35" data-search="refl reward specific 100">
+                  <tr class="leaderboard-specific-start" data-main-table-row data-backbone="sd35" data-search="flowgrpo reward specific 100">
+                    <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-flow" aria-hidden="true">↗</span><span class="model-copy">+ FlowGRPO</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td>21.65</td><td>0.263</td><td>0.248</td><td>5.26</td><td>0.42</td><td>−0.82</td><td>3.79</td><td>0.342</td><td>0.095</td><td>0.198</td>
+                  </tr>
+                  <tr data-main-table-row data-backbone="sd35" data-search="refl reward specific 100">
                     <th scope="row"><span class="model-lockup"><span class="model-icon model-icon-refl" aria-hidden="true">R</span><span class="model-copy">+ ReFL</span></span></th><td><span class="specific-badge">✓</span></td><td>100</td><td><u>23.92</u></td><td>0.308</td><td><u>0.358</u></td><td class="score-best">12.09</td><td>1.28</td><td>6.18</td><td><u>4.85</u></td><td>0.408</td><td>0.193</td><td>0.290</td>
                   </tr>
                   <tr data-main-table-row data-backbone="sd35" data-search="diffusionnft reward specific 100">
@@ -379,28 +382,22 @@
 
         <div class="result-visual reveal">
           <div class="result-visual-copy">
-            <p class="mini-label">Normalized progress</p>
-            <h3>DiffusionOPSD improves fastest and finishes highest.</h3>
-            <p>Training reward and held-out quality are reported separately, while cumulative GPU-hours provide a common compute axis across methods.</p>
-            <p><strong>DiffusionOPSD*</strong> is the accelerated version. See the <a href="blog/v2/">V2 Blog</a> for the improvements.</p>
-            <div class="legend-list" aria-label="Methods in chart">
+            <p class="mini-label">Paradigm &amp; compute efficiency</p>
+            <h3>In-trajectory self-distillation converges fastest and ranks top.</h3>
+            <p>Across 20 target-reward settings on SD3.5-M and Z-Image-Turbo, DiffusionOPSD* and DiffusionOPSD reach 90% normalized held-out gain with 6.8× and 4.3× less compute than ReFL, outperforming trajectory-level baselines at 25% budget and final rank.</p>
+            <p><strong>DiffusionOPSD*</strong> is the exact single-branch accelerated variant. See the <a href="blog/v2/">V2 Blog</a> for the recipe details.</p>
+            <div class="legend-list" aria-label="Methods in figure">
+              <span><i class="legend opsd-star"></i>DiffusionOPSD*</span>
               <span><i class="legend opsd"></i>DiffusionOPSD</span>
               <span><i class="legend refl"></i>ReFL</span>
-              <span><i class="legend flow"></i>FlowGRPO</span>
               <span><i class="legend nft"></i>DiffusionNFT</span>
+              <span><i class="legend flow"></i>FlowGRPO</span>
             </div>
           </div>
-          <div class="interactive-chart-card" data-interactive-chart="aggregate">
-            <div class="interactive-chart-bar">
-              <div><span>Interactive figure</span><strong>Hover to inspect · click a method to filter</strong></div>
-              <div class="chart-legend" data-chart-legend aria-label="Toggle chart methods"></div>
-            </div>
-            <div class="chart-stage">
-              <div class="chart-canvas" id="aggregate-chart" role="img" aria-label="Interactive native training and held-out quality gain curves"></div>
-              <img class="chart-fallback" src="assets/training-curves.png" alt="Training and held-out quality curves comparing DiffusionOPSD and DiffusionOPSD* against baselines" width="4090" height="1779" loading="lazy">
-              <div class="chart-tooltip" role="status" aria-live="polite"></div>
-            </div>
-          </div>
+          <button class="chart-button" type="button" data-lightbox="assets/training-curves.png" data-caption="Paradigm comparison, held-out gain at 25% budget, compute efficiency versus ReFL (6.8× and 4.3× less compute), and benchmark rankings across 20 settings on SD3.5-M and Z-Image-Turbo.">
+            <img src="assets/training-curves.png" alt="Paradigm comparison, compute efficiency, and benchmark ranking across 20 settings comparing DiffusionOPSD*, DiffusionOPSD, ReFL, DiffusionNFT, and FlowGRPO" width="2511" height="864" loading="lazy">
+            <span class="expand-label">Expand figure <span aria-hidden="true">↗</span></span>
+          </button>
         </div>
 
         <div class="backbone-strip reveal">
@@ -408,12 +405,12 @@
             <span class="backbone-mark"></span>
             <div><small>Backbone 01</small><strong>SD3.5-M</strong></div>
           </div>
-          <p>Strong final reward with a 40% reduction in profiled training cost.</p>
+          <p>40% fewer GPU-hours with DiffusionOPSD and 62% fewer with DiffusionOPSD*, reaching baseline terminal quality up to 13.1× faster.</p>
           <div>
             <span class="backbone-mark cyan"></span>
             <div><small>Backbone 02</small><strong>Z-Image-Turbo</strong></div>
           </div>
-          <p>Consistent improvement under a step-distilled native schedule with 63% lower training GPU-hours.</p>
+          <p>Improves all ten objectives (+97% mean normalized gain) with 63% fewer GPU-hours for DiffusionOPSD and 74% fewer for DiffusionOPSD*.</p>
         </div>
       </div>
     </section>
@@ -422,138 +419,96 @@
       <div class="section-inner">
         <div class="section-heading reveal">
           <div>
-            <p class="kicker">Diagnosable alignment</p>
-            <h2 id="analysis-title">A better target need not produce a better finite update</h2>
+            <p class="kicker">Diagnosable self-distillation</p>
+            <h2 id="analysis-title">Separating self-teacher synthesis from student distillation</h2>
           </div>
           <p>
-            Explicit supervision lets us audit target construction and finite realization as separate stages. The diagnostics below move from local direction attribution to same-query fitting, then test whether the complete protocol remains stable across budgets, backbones, and reward settings.
+            Stop-gradient detachment removes the decoder and reward model from student backward passes and lets us audit synthesis gain, realized student shifts, multi-reward transfer, and human preference independently.
           </p>
         </div>
 
         <div class="analysis-summary-grid reveal" aria-label="Mechanism findings">
           <article>
-            <span>Target construction</span>
-            <strong>+0.03511</strong>
-            <p>Fixed-suffix reward gain from the reward-gradient positive target.</p>
+            <span>Gradient dispersion</span>
+            <strong>−50.5%</strong>
+            <p>Cross-prompt gradient CV reduction over coupled ReFL (up to +36.5% held-out gain, 22.5 SE) with −15.4% peak policy VRAM.</p>
           </article>
           <article>
-            <span>HPSv2.1 reversal</span>
-            <strong>62.3%</strong>
-            <p>Prompts where the better constructed target produces the lower finite update.</p>
+            <span>Rollout concordance</span>
+            <strong>93.9%</strong>
+            <p>Held-out prompts with positive full-trajectory rollout gains and 93.4%–96.1% local-to-suffix gradient alignment (n = 512).</p>
           </article>
           <article>
-            <span>Controlled scope</span>
-            <strong>n = 512</strong>
-            <p>Held-out, same-query probes with parameters restored between prompts.</p>
+            <span>Human preference</span>
+            <strong>Up to 90%</strong>
+            <p>Blinded pairwise win rate over DiffusionNFT (78% fidelity, 77% quality, 81% realism vs. DRaFT and ReFL).</p>
           </article>
         </div>
 
         <div class="analysis-grid">
           <article class="analysis-card analysis-card-wide reveal">
             <div class="card-copy">
-              <span class="card-index">01 · Endpoint controls</span>
-              <h3>The reward-gradient target stays strongest—and CFG-free training wins</h3>
-              <p>Three linked diagnostics compare target direction, implementation sensitivity, and the full train/eval CFG grid. Hover or focus any mark for its exact value; click to keep a selection while comparing panels.</p>
+              <span class="card-index">01 · Training dynamics &amp; retention</span>
+              <h3>Fastest shared-scale progress with zero late-stage regression</h3>
+              <p>Across all single-reward tasks on both backbones, DiffusionOPSD and DiffusionOPSD* retain medians of 98% and 100% of peak within-run gains—exceeding FlowGRPO by 13 percentage points and ReFL's lower tail by 20 points—while maintaining smooth 300-update multi-reward composite trajectories.</p>
             </div>
-            <div class="cfg-chart-card endpoint-controls-card" data-endpoint-chart data-cfg-chart>
-              <div class="cfg-chart-toolbar">
-                <div>
-                  <span>Interactive figure</span>
-                  <strong>Direction · implementation · CFG dependence</strong>
-                </div>
-                <div class="cfg-view-switch" role="group" aria-label="CFG chart display">
-                  <button type="button" class="active" data-cfg-view="score" aria-pressed="true">Score</button>
-                  <button type="button" data-cfg-view="gap" aria-pressed="false">Gap from best</button>
-                </div>
-              </div>
-
-              <div class="endpoint-panels">
-                <section class="endpoint-panel" aria-labelledby="direction-endpoint-title">
-                  <h4 id="direction-endpoint-title"><span>(a)</span> Direction endpoint</h4>
-                  <div class="endpoint-svg-chart" id="direction-endpoint-chart" role="group" aria-label="Interactive CLIPScore comparison of reward-gradient, random, no-op, and rollout-residual target directions"></div>
-                </section>
-
-                <section class="endpoint-panel" aria-labelledby="implementation-sensitivity-title">
-                  <h4 id="implementation-sensitivity-title"><span>(b)</span> Implementation sensitivity</h4>
-                  <div class="endpoint-svg-chart" id="implementation-sensitivity-chart" role="group" aria-label="Interactive ranges of CLIPScore change across implementation controls"></div>
-                </section>
-
-                <section class="endpoint-panel endpoint-panel-cfg" aria-labelledby="cfg-dependence-title">
-                  <h4 id="cfg-dependence-title"><span>(c)</span> CFG dependence</h4>
-                  <div class="cfg-plot-shell cfg-plot-shell-compact">
-                    <span class="cfg-y-title">Eval <i>g</i><sub>ev</sub></span>
-                    <div class="cfg-y-labels" aria-hidden="true"><span>6.0</span><span>4.5</span><span>1.0</span></div>
-                    <div class="cfg-plot" aria-label="Interactive CFG dependence chart. No CFG corresponds to train and evaluation guidance scale 1.0 for SD3.5-M.">
-                      <svg class="cfg-guides" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                        <path class="cfg-guide-matched" d="M 12 88 L 88 12"></path>
-                        <path class="cfg-guide-product cfg-guide-product-a" d="M 12 50 C 33 76, 45 86, 50 88"></path>
-                        <path class="cfg-guide-product cfg-guide-product-b" d="M 12 12 C 30 55, 55 82, 88 88"></path>
-                      </svg>
-
-                      <button class="cfg-point cfg-point-best" type="button" style="--x:12%;--y:88%;--point:#787878" data-train="1.0" data-eval="1.0" data-score="0.312" data-gap="0.000" data-note="CFG-free · strongest setting" aria-label="Train 1.0, evaluate 1.0, CLIPScore 0.312, strongest setting"><span data-cfg-value>312</span></button>
-                      <button class="cfg-point" type="button" style="--x:12%;--y:50%;--point:#56bcc7" data-train="1.0" data-eval="4.5" data-score="0.311" data-gap="-0.001" data-note="Evaluation-only CFG" aria-label="Train 1.0, evaluate 4.5, CLIPScore 0.311"><span data-cfg-value>311</span></button>
-                      <button class="cfg-point" type="button" style="--x:12%;--y:12%;--point:#5087f2" data-train="1.0" data-eval="6.0" data-score="0.310" data-gap="-0.002" data-note="Evaluation-only CFG" aria-label="Train 1.0, evaluate 6.0, CLIPScore 0.310"><span data-cfg-value>310</span></button>
-                      <button class="cfg-point" type="button" style="--x:50%;--y:88%;--point:#56bcc7" data-train="4.5" data-eval="1.0" data-score="0.278" data-gap="-0.034" data-note="Train/eval mismatch" aria-label="Train 4.5, evaluate 1.0, CLIPScore 0.278"><span data-cfg-value>278</span></button>
-                      <button class="cfg-point cfg-point-matched" type="button" style="--x:50%;--y:50%;--point:#28825a" data-train="4.5" data-eval="4.5" data-score="0.307" data-gap="-0.005" data-note="Matched CFG · below CFG-free" aria-label="Train 4.5, evaluate 4.5, CLIPScore 0.307"><span data-cfg-value>307</span></button>
-                      <button class="cfg-point" type="button" style="--x:50%;--y:12%;--point:#cea831" data-train="4.5" data-eval="6.0" data-score="0.306" data-gap="-0.006" data-note="Train/eval mismatch" aria-label="Train 4.5, evaluate 6.0, CLIPScore 0.306"><span data-cfg-value>306</span></button>
-                      <button class="cfg-point" type="button" style="--x:88%;--y:88%;--point:#5087f2" data-train="6.0" data-eval="1.0" data-score="0.263" data-gap="-0.049" data-note="Largest mismatch penalty" aria-label="Train 6.0, evaluate 1.0, CLIPScore 0.263"><span data-cfg-value>263</span></button>
-                      <button class="cfg-point" type="button" style="--x:88%;--y:50%;--point:#cea831" data-train="6.0" data-eval="4.5" data-score="0.308" data-gap="-0.004" data-note="Train/eval mismatch" aria-label="Train 6.0, evaluate 4.5, CLIPScore 0.308"><span data-cfg-value>308</span></button>
-                      <button class="cfg-point cfg-point-matched" type="button" style="--x:88%;--y:12%;--point:#1e5aaa" data-train="6.0" data-eval="6.0" data-score="0.305" data-gap="-0.007" data-note="Matched CFG · below CFG-free" aria-label="Train 6.0, evaluate 6.0, CLIPScore 0.305"><span data-cfg-value>305</span></button>
-                    </div>
-                    <div class="cfg-x-labels" aria-hidden="true"><span>1.0</span><span>4.5</span><span>6.0</span></div>
-                    <span class="cfg-x-title">Train <i>g</i><sub>tr</sub></span>
-                  </div>
-                </section>
-              </div>
-
-              <div class="cfg-chart-footer">
-                <div class="cfg-readout" aria-live="polite">
-                  <span>Selected control</span>
-                  <strong data-cfg-readout-title>Train 1.0 · Eval 1.0</strong>
-                  <p data-cfg-readout-value>0.312 CLIPScore · CFG-free · strongest setting</p>
-                </div>
-                <div class="cfg-chart-legend" aria-label="Chart guide legend">
-                  <span><i class="cfg-legend-line cfg-legend-matched"></i>Matched scale</span>
-                  <span><i class="cfg-legend-line cfg-legend-product"></i>Same-product guides</span>
-                </div>
-              </div>
-            </div>
+            <button class="chart-button" type="button" data-lightbox="assets/robustness.png" data-caption="Normalized training dynamics and terminal retention: (a) shared-scale progress, (b) terminal retention per setting (100% for OPSD*, 98% for OPSD), and (c) multi-reward composite gain.">
+              <img src="assets/robustness.png" alt="Normalized shared-scale training progress, terminal retention per setting, and multi-reward composite trajectories" width="2511" height="737" loading="lazy">
+              <span class="expand-label">Expand figure <span aria-hidden="true">↗</span></span>
+            </button>
           </article>
 
           <article class="analysis-card analysis-card-wide reveal">
             <div class="card-copy">
-              <span class="card-index">02 · Robustness</span>
-              <h3>The complete loop remains stable beyond the isolated probe</h3>
-              <p>Across 71 single-reward cells, shared-reference gain and terminal retention are paired with two 300-update multi-reward runs, reproducing the three diagnostics reported in Figure 7.</p>
+              <span class="card-index">02 · Multi-reward &amp; self-teacher ablations</span>
+              <h3>Joint multi-reward transfer, step-distilled adaptation, and self-teacher variants</h3>
+              <p>One shared SD3.5-M student retains up to 112.9% of specialist gains and boosts unguided GenEval accuracy by 117.9%. On Z-Image-Turbo, DiffusionOPSD and DiffusionOPSD* reach +97% mean normalized gain across all 10 objectives, while two-sided on-policy self-teachers outperform forward-noised (+3.9%), positive-only (+6.6%), and residual controls.</p>
             </div>
-            <div class="interactive-chart-card interactive-chart-card-wide" data-interactive-chart="robustness">
-              <div class="interactive-chart-bar">
-                <div><span>Interactive figure</span><strong>Hover to inspect · click a method to filter</strong></div>
-                <div class="chart-legend" data-chart-legend aria-label="Toggle chart methods"></div>
-              </div>
-              <div class="chart-stage">
-                <div class="chart-canvas" id="robustness-chart" role="img" aria-label="Interactive robustness, terminal stability, and multi-reward plots"></div>
-                <img class="chart-fallback" src="assets/robustness.png" alt="Figure 7 shared-reference gain, terminal stability, and multi-reward composite results including DiffusionOPSD*" width="3686" height="1325" loading="lazy">
-                <div class="chart-tooltip" role="status" aria-live="polite"></div>
-              </div>
+            <button class="chart-button" type="button" data-lightbox="assets/multireward-ablations.png" data-caption="Multi-reward alignment, step-distilled adaptation, GenEval accuracy, and self-teacher synthesis ablations across (a–c) joint held-out trajectories, (d) step-distilled gain over base, (e) GenEval, and (f, g) self-teacher variants.">
+              <img src="assets/multireward-ablations.png" alt="Joint multi-reward held-out curves, step-distilled gain over base, GenEval overall accuracy, and self-teacher variant ablations" width="2511" height="749" loading="lazy">
+              <span class="expand-label">Expand figure <span aria-hidden="true">↗</span></span>
+            </button>
+          </article>
+
+          <article class="analysis-card analysis-card-wide reveal">
+            <div class="card-copy">
+              <span class="card-index">03 · Mechanism &amp; efficiency audits</span>
+              <h3>Iso-budget mechanism attribution, shift bounds, and rollout concordance</h3>
+              <p>Single-step single-trajectory synthesis cuts measured training time by 30.5% while matching CLIPScore within 0.4%. Across four matched-budget stages, gradient normalization, stationary EMA anchoring, and adaptive residual scaling outperform coupled ReFL by up to 36.5% (22.5 SE), keeping 100% of shifts inside ρ = 0.10 and cutting off-query drift by 51.7% relative to DiffusionNFT.</p>
             </div>
+            <button class="chart-button" type="button" data-lightbox="assets/ablation-efficiency.png" data-caption="Self-teacher efficiency, cumulative mechanism attribution, and post-distillation audits: (a–d) synthesis steps and prompt allocation, (e, f) four-stage iso-budget gains and gradient CV, (g) clean-output shifts inside ρ = 0.10, and (h) 93.9% positive suffix-to-rollout concordance.">
+              <img src="assets/ablation-efficiency.png" alt="Self-teacher steps and prompt allocation, four-stage iso-budget mechanism attribution, clean-output shift bounds, and suffix-rollout concordance" width="2511" height="584" loading="lazy">
+              <span class="expand-label">Expand figure <span aria-hidden="true">↗</span></span>
+            </button>
+          </article>
+
+          <article class="analysis-card analysis-card-wide reveal">
+            <div class="card-copy">
+              <span class="card-index">04 · Robustness &amp; human preference</span>
+              <h3>Stable hyperparameter plateaus, CFG-free superiority, and blinded human wins</h3>
+              <p>Held-out CLIPScore stays within one standard error across broad interior ranges of σ<sub>q</sub>, ρ, and β, and CFG-free training avoids the up to 15.7% unguided drop of guided training. Across 2,400 single-reward and 1,500 multi-axis blinded ratings, annotators prefer DiffusionOPSD over every baseline—reaching 90% over DiffusionNFT—with consistent gains across all six DrawBench categories.</p>
+            </div>
+            <button class="chart-button" type="button" data-lightbox="assets/robustness-human.png" data-caption="Hyperparameter sensitivity, guidance controls, and human preference: (a) σ_q, ρ, and β plateaus, (b) CFG-free training across evaluation scales, (c–e) blinded single-reward and multi-axis human win rates, and (f) DrawBench category breakdown.">
+              <img src="assets/robustness-human.png" alt="Hyperparameter robustness, CFG-free training comparison, blinded human preference win rates, and DrawBench category breakdown" width="2511" height="598" loading="lazy">
+              <span class="expand-label">Expand figure <span aria-hidden="true">↗</span></span>
+            </button>
           </article>
 
           <article class="analysis-explainer reveal">
-            <span class="card-index">03 · Interpretation</span>
+            <span class="card-index">05 · Interpretation</span>
             <h3>Three measurements answer three different questions</h3>
             <ol>
-              <li><strong>Construction gain</strong><span>Did reward guidance create a better local output target?</span></li>
-              <li><strong>Realized gain</strong><span>Did the finite parameter update reproduce that improvement at the same query?</span></li>
-              <li><strong>End-to-end quality</strong><span>Did repeated construct–fit–re-anchor iterations improve held-out generations?</span></li>
+              <li><strong>Synthesis gain</strong><span>Did local reward gradients synthesize a better clean-output self-teacher at the query?</span></li>
+              <li><strong>Realized gain</strong><span>Did the finite student distillation step preserve that improvement conservatively at the query and across regenerated rollouts?</span></li>
+              <li><strong>End-to-end quality</strong><span>Did repeated synthesize–distill–refresh iterations improve held-out benchmarks, compositional accuracy, and human preference?</span></li>
             </ol>
-            <p>DiffusionOPSD exposes all three without treating any one of them as a substitute for the others.</p>
+            <p>DiffusionOPSD exposes all three stages separately without retaining decoder or reward graphs during student backpropagation.</p>
           </article>
 
           <article class="principle-card reveal">
             <span class="quote-mark" aria-hidden="true">“</span>
-            <p>Target construction and finite realization should be evaluated separately in diffusion post-training.</p>
-            <span class="principle-label">Evaluation principle</span>
+            <p>Self-teacher synthesis and on-policy student distillation should be separated and evaluated independently in diffusion post-training.</p>
+            <span class="principle-label">Self-distillation principle</span>
           </article>
         </div>
       </div>
@@ -567,7 +522,7 @@
             <h2 id="gallery-title">Prompt fidelity across diverse visual tasks</h2>
           </div>
           <p>
-            Across rendered text, motion, structured diagrams, object composition, and fine detail, DiffusionOPSD preserves the requested content more consistently than the compared baselines.
+            Across rendered typography, motion, structured diagrams, rare concept bindings, and natural surface materials, DiffusionOPSD preserves requested details without the attribute omission of DiffusionNFT or high-frequency oversaturation of ReFL.
           </p>
         </div>
       </div>
@@ -595,7 +550,7 @@
             </article>
 
             <article class="comparison-slide" data-comparison-slide aria-hidden="true">
-              <div class="comparison-prompt"><span>Prompt 02</span><p>Liquid-mercury 3D “DiffusionOPSD” letters on a dark reflective stage with volumetric spotlights and crisp product-render detail.</p></div>
+              <div class="comparison-prompt"><span>Prompt 02</span><p>Liquid-mercury 3D letters of “DiffusionOPSD”, placed on a dark reflective stage with volumetric spotlights and crisp product-render detail.</p></div>
               <div class="comparison-images">
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/base.jpg" data-caption="Base · Liquid-mercury typography"><span>Base</span><img src="assets/comparisons/02-typography/base.jpg" alt="Base model typography result" width="1254" height="1254" loading="lazy"></button>
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/02-typography/refl.jpg" data-caption="ReFL · Liquid-mercury typography"><span>ReFL</span><img src="assets/comparisons/02-typography/refl.jpg" alt="ReFL typography result" width="1254" height="1254" loading="lazy"></button>
@@ -617,7 +572,7 @@
             </article>
 
             <article class="comparison-slide" data-comparison-slide aria-hidden="true">
-              <div class="comparison-prompt"><span>Prompt 04</span><p>A football striker performing an overhead bicycle kick in a floodlit stadium, with both feet off the ground and the torso tilted backward.</p></div>
+              <div class="comparison-prompt"><span>Prompt 04</span><p>Floodlit stadium football moment: striker mid bicycle-kick, roaring crowd, flags, turf spray, sweat droplets in the background, and motion blur effect.</p></div>
               <div class="comparison-images">
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/base.jpg" data-caption="Base · Bicycle kick"><span>Base</span><img src="assets/comparisons/04-motion/base.jpg" alt="Base model bicycle kick result" width="1254" height="1254" loading="lazy"></button>
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/04-motion/refl.jpg" data-caption="ReFL · Bicycle kick"><span>ReFL</span><img src="assets/comparisons/04-motion/refl.jpg" alt="ReFL bicycle kick result" width="1254" height="1254" loading="lazy"></button>
@@ -628,7 +583,7 @@
             </article>
 
             <article class="comparison-slide" data-comparison-slide aria-hidden="true">
-              <div class="comparison-prompt"><span>Prompt 05</span><p>A clearly labeled educational poster showing the Earth's crust, mantle, outer core, and inner core, with readable depth and temperature annotations.</p></div>
+              <div class="comparison-prompt"><span>Prompt 05</span><p>Geology cross-section poster of Earth layers, including crust, mantle, outer and inner core, with detailed depths, temperatures and labels.</p></div>
               <div class="comparison-images">
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/base.jpg" data-caption="Base · Earth layers poster"><span>Base</span><img src="assets/comparisons/05-earth-layers/base.jpg" alt="Base model Earth layers poster" width="1254" height="1254" loading="lazy"></button>
                 <button class="comparison-image" type="button" data-lightbox="assets/comparisons/05-earth-layers/refl.jpg" data-caption="ReFL · Earth layers poster"><span>ReFL</span><img src="assets/comparisons/05-earth-layers/refl.jpg" alt="ReFL Earth layers poster" width="1254" height="1254" loading="lazy"></button>

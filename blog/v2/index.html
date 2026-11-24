@@ -32,16 +32,16 @@
     </figure>
 
     <div class="prose introduction">
-      <p>DiffusionOPSD turns image-level reward guidance into explicit targets for clean-output predictions at sampled queries. In v2, we keep that principle and make the training recipe more efficient: <strong>one reward-ascent step for target construction, broader prompt coverage, and rollouts that stop at the query.</strong> We also correct the HPSv3 reward pipeline.</p>
-      <p>The controlled experiment preserves held-out performance while reducing training GPU time by approximately <strong>30.5%</strong>. A separate measurement of one complete update with the old and new recipes reduces update time by <strong>39.7%</strong>.</p>
+      <p>DiffusionOPSD converts image-level reward guidance into explicit self-teachers for clean-output predictions at sampled queries. In v2 (<strong>DiffusionOPSD*</strong> in the paper), we keep that principle and make the training recipe leaner via an exact single-branch reduction: <strong>one reward-ascent step for self-teacher synthesis, broader prompt coverage, and rollouts that stop at the query.</strong> We also correct the HPSv3 reward pipeline.</p>
+      <p>The controlled experiment preserves held-out performance (within 0.4% CLIPScore) while reducing training GPU time by approximately <strong>30.5%</strong>. A separate measurement of one complete update with the old and new recipes reduces update time by <strong>39.7%</strong>.</p>
     </div>
 
     <section id="changes" class="article-section">
-      <div class="prose section-heading"><h2>Three changes.<br>One correction.</h2><p class="section-intro">Spend less on each target. Explore more prompts. Stop the rollout where training needs it.</p></div>
+      <div class="prose section-heading"><h2>Three changes.<br>One correction.</h2><p class="section-intro">Spend less on each self-teacher. Explore more prompts. Stop the rollout where training needs it.</p></div>
 
       <article class="change prose reveal">
-        <div class="change-title"><span class="change-number">01</span><h3>One reward-ascent step for target construction.</h3></div>
-        <p>v1 takes two normalized reward-gradient ascent steps to construct its positive target. v2 takes one, reducing reward-gradient computation while retaining bounded positive and negative targets and finite fitting. Both the behavior-policy EMA and the checkpoint EMA are retained.</p>
+        <div class="change-title"><span class="change-number">01</span><h3>One reward-ascent step for self-teacher synthesis.</h3></div>
+        <p>v1 takes two normalized reward-gradient ascent steps to synthesize its positive self-teacher. v2 takes one (<i>M</i><sub>tgt</sub> = 1), where positive and negative displacements become exact opposites and the dual-branch objective simplifies to an exact single-branch distillation loss. Both the self-teacher EMA and the checkpoint EMA are retained.</p>
         <div class="before-after ascent-diagram" aria-label="Positive-target construction changes from two reward-ascent steps to one">
           <div><span class="version-label">V1</span><div class="flow"><b>Anchor</b><i>→</i><b>Ascent 1</b><i>→</i><b>Ascent 2</b></div></div>
           <div><span class="version-label blue">V2</span><div class="flow"><b>Anchor</b><i>→</i><b class="highlight">Ascent 1</b></div></div>
@@ -60,11 +60,11 @@
 
       <article class="change prose reveal">
         <div class="change-title"><span class="change-number">03</span><h3>Stop the rollout at the query.</h3></div>
-        <p>DiffusionOPSD fits detached targets for clean-output predictions at sampled low-noise queries. With K = 1, the group-normalized fitting weight is fixed at 0.5, so finite fitting no longer requires the rollout endpoint. The v2 <strong>query-prefix rollout</strong> collects the required query state and clean-output anchor, then skips the remaining denoising, endpoint decoding, and endpoint reward evaluation.</p>
+        <p>DiffusionOPSD distills detached self-teachers for clean-output predictions at sampled low-noise queries. With K = 1, the group-normalized distillation weight is fixed at 0.5 and cancels in the single-branch loss, so student distillation no longer requires the rollout endpoint. The v2 <strong>query-prefix rollout</strong> collects the required query state and clean-output anchor, then skips the remaining denoising, endpoint decoding, and endpoint reward evaluation.</p>
         <div class="prefix-diagram" aria-label="Query prefix retains the trajectory through the query and skips subsequent endpoint computation">
           <div class="prefix-labels"><span>Noise</span><span class="blue">Training query</span><span>Image endpoint</span></div>
           <div class="trajectory"><i></i><i></i><i></i><i class="query"></i><i class="unused"></i><i class="unused"></i><i class="unused"></i></div>
-          <div class="prefix-labels bottom"><span>Keep the prefix</span><span class="blue">Target construction → finite fitting</span><span>Skip the suffix</span></div>
+          <div class="prefix-labels bottom"><span>Keep the prefix</span><span class="blue">Self-teacher synthesis → student distillation</span><span>Skip the suffix</span></div>
         </div>
       </article>
 
@@ -113,7 +113,7 @@
           <p>The HPSv3 v1 training curve uses the corrected old-recipe rerun. <a href="https://github.com/MizzenAI/HPSv3" target="_blank" rel="noopener">Official HPSv3 implementation ↗</a></p>
         </div>
       </details>
-      <div class="prose closing"><p>The update keeps the central idea intact: construct bounded positive and negative targets from reward gradients, fit them as detached supervision through finite fitting, and refresh the behavior policy. v2 makes that loop leaner.</p><a class="pill primary" href="../../">Explore DiffusionOPSD <span>↗</span></a></div>
+      <div class="prose closing"><p>The update keeps the central idea intact: synthesize bounded positive and negative self-teachers from local reward gradients, distill them as detached supervision under a finite student budget, and refresh the EMA self-teacher online. v2 (DiffusionOPSD*) makes that loop leaner.</p><a class="pill primary" href="../../">Explore DiffusionOPSD <span>↗</span></a></div>
     </section>
   </main>
   <footer><a class="wordmark" href="../../">Diffusion<span class="brand-blue">OPSD</span></a><span>On-Policy Self-Distillation in Diffusion Models</span><a href="#main">Back to top ↑</a></footer>
