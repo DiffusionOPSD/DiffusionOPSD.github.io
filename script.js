@@ -197,6 +197,70 @@ const sectionObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: '-42% 0px -50% 0px', threshold: 0 });
 sections.forEach((section) => sectionObserver.observe(section));
 
+const videoStage = document.querySelector('[data-video-stage]');
+const overviewVideo = document.querySelector('#overview-video');
+if (videoStage && overviewVideo) {
+  const playOverlay = videoStage.querySelector('[data-video-play]');
+  const playLabel = videoStage.querySelector('[data-video-play-label]');
+  const chapterButtons = [...videoStage.querySelectorAll('[data-video-seek]')];
+
+  overviewVideo.controls = false;
+
+  const engageVideo = () => {
+    overviewVideo.controls = true;
+    videoStage.classList.add('is-engaged');
+  };
+
+  const syncActiveChapter = () => {
+    const t = overviewVideo.currentTime;
+    let activeButton = null;
+    chapterButtons.forEach((button) => {
+      if (t >= Number(button.dataset.videoSeek)) activeButton = button;
+    });
+    chapterButtons.forEach((button) => {
+      const active = button === activeButton && videoStage.classList.contains('is-engaged');
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  };
+
+  playOverlay?.addEventListener('click', () => {
+    engageVideo();
+    overviewVideo.play().catch(() => {});
+  });
+
+  overviewVideo.addEventListener('play', () => {
+    engageVideo();
+    syncActiveChapter();
+  });
+
+  overviewVideo.addEventListener('timeupdate', syncActiveChapter);
+
+  overviewVideo.addEventListener('ended', () => {
+    overviewVideo.controls = false;
+    videoStage.classList.remove('is-engaged');
+    if (playLabel) playLabel.textContent = 'Replay film';
+    syncActiveChapter();
+  });
+
+  chapterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const seekTo = Number(button.dataset.videoSeek) || 0;
+      const startAt = () => {
+        engageVideo();
+        overviewVideo.currentTime = seekTo;
+        overviewVideo.play().catch(() => {});
+        syncActiveChapter();
+      };
+      if (overviewVideo.readyState >= 1) startAt();
+      else {
+        overviewVideo.addEventListener('loadedmetadata', startAt, { once: true });
+        overviewVideo.load();
+      }
+    });
+  });
+}
+
 const revealObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach((entry) => {
     if (!entry.isIntersecting) return;

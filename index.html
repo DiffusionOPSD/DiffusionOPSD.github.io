@@ -30,6 +30,7 @@
 
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="#overview">Overview</a>
+      <a href="#video">Video</a>
       <a href="#method">Method</a>
       <a href="#results">Results</a>
       <a href="#analysis">Analysis</a>
@@ -59,6 +60,7 @@
 
     <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
       <a href="#overview">Overview</a>
+      <a href="#video">Video</a>
       <a href="#method">Method</a>
       <a href="#results">Results</a>
       <a href="#analysis">Analysis</a>
@@ -156,10 +158,72 @@
         </a>
       </div>
 
-      <a class="scroll-cue" href="#method" aria-label="Scroll to method">
+      <a class="scroll-cue" href="#video" aria-label="Scroll to overview video">
         <span>Discover</span>
         <span class="scroll-line"></span>
       </a>
+    </section>
+
+    <section class="section video-section" id="video" aria-labelledby="video-title">
+      <div class="section-inner">
+        <div class="section-heading reveal">
+          <div>
+            <p class="kicker light">Overview film</p>
+            <h2 id="video-title">DiffusionOPSD in 66 seconds</h2>
+          </div>
+          <p>
+            Watch how DiffusionOPSD moves post-training from noisy trajectory-level credits to explicit in-trajectory self-teachers—accelerating convergence with single-branch DiffusionOPSD* while preserving fine visual detail.
+          </p>
+        </div>
+
+        <div class="video-stage reveal" data-video-stage>
+          <div class="video-frame">
+            <video
+              id="overview-video"
+              class="overview-video"
+              controls
+              playsinline
+              preload="metadata"
+              poster="assets/diffusionopsd-editorial-poster.jpg"
+              width="1920"
+              height="1080"
+            >
+              <source src="assets/diffusionopsd-editorial.mp4" type="video/mp4">
+              Your browser does not support HTML5 video. <a href="assets/diffusionopsd-editorial.mp4">Download the overview video (MP4)</a>.
+            </video>
+            <button class="video-play-overlay" type="button" data-video-play aria-label="Play DiffusionOPSD overview video">
+              <span class="video-play-pill">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                <span data-video-play-label>Play film</span>
+                <span class="video-play-duration">1:06</span>
+              </span>
+            </button>
+          </div>
+
+          <div class="video-chapters" role="group" aria-label="Video chapters">
+            <button class="video-chapter" type="button" data-video-seek="6">
+              <span class="video-chapter-time">00:06</span>
+              <strong>In-trajectory RL</strong>
+              <small>Reward-gradient self-teachers</small>
+            </button>
+            <button class="video-chapter" type="button" data-video-seek="18">
+              <span class="video-chapter-time">00:18</span>
+              <strong>4-step pipeline</strong>
+              <small>Rollout, probe, two-sided fit, EMA</small>
+            </button>
+            <button class="video-chapter" type="button" data-video-seek="37">
+              <span class="video-chapter-time">00:37</span>
+              <strong>Efficiency &amp; gains</strong>
+              <small>20/20 best · 74% fewer GPU-hrs</small>
+            </button>
+            <button class="video-chapter" type="button" data-video-seek="47">
+              <span class="video-chapter-time">00:47</span>
+              <strong>Visual results</strong>
+              <small>Held-out comparisons &amp; evolution</small>
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="section intro-section" id="method" aria-labelledby="method-title">
